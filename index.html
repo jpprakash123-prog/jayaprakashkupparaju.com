@@ -1,26 +1,587 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>Jayaprakash Kupparaju</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Jayaprakash Kupparaju | Cloud, DevOps, SRE & Automation</title>
+
+    <meta name="description"
+          content="Personal website of Jayaprakash Kupparaju — Cloud, DevOps, SRE, Automation, AI, public speaking, running and continuous learning.">
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
+            background: #f8fafc;
+            color: #1e293b;
+            line-height: 1.7;
+        }
+
+        /* Navigation */
+
+        nav {
+            background: #0f172a;
+            color: white;
+            padding: 18px 8%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .logo {
+            font-size: 20px;
+            font-weight: 700;
+        }
+
+        nav ul {
+            display: flex;
+            list-style: none;
+            gap: 28px;
+        }
+
+        nav a {
+            color: #cbd5e1;
+            text-decoration: none;
+            font-size: 15px;
+        }
+
+        nav a:hover {
+            color: white;
+        }
+
+        /* Hero */
+
+        .hero {
+            min-height: 78vh;
+            display: flex;
+            align-items: center;
+            padding: 80px 10%;
+            background: linear-gradient(135deg, #0f172a, #1e3a5f);
+            color: white;
+        }
+
+        .hero-content {
+            max-width: 850px;
+        }
+
+        .hero-small {
+            color: #38bdf8;
+            font-weight: 600;
+            margin-bottom: 12px;
+            letter-spacing: 1px;
+        }
+
+        .hero h1 {
+            font-size: 58px;
+            line-height: 1.1;
+            margin-bottom: 20px;
+        }
+
+        .hero h2 {
+            font-size: 24px;
+            font-weight: 400;
+            color: #cbd5e1;
+            margin-bottom: 24px;
+        }
+
+        .hero p {
+            max-width: 700px;
+            color: #cbd5e1;
+            font-size: 18px;
+            margin-bottom: 35px;
+        }
+
+        .button {
+            display: inline-block;
+            padding: 12px 22px;
+            margin-right: 10px;
+            margin-bottom: 10px;
+            background: #0284c7;
+            color: white;
+            text-decoration: none;
+            border-radius: 7px;
+            font-weight: 600;
+        }
+
+        .button.secondary {
+            background: transparent;
+            border: 1px solid #64748b;
+        }
+
+        /* Sections */
+
+        section {
+            padding: 85px 10%;
+        }
+
+        .section-title {
+            font-size: 34px;
+            color: #0f172a;
+            margin-bottom: 12px;
+        }
+
+        .section-description {
+            max-width: 700px;
+            color: #64748b;
+            margin-bottom: 40px;
+        }
+
+        /* About */
+
+        .about {
+            background: white;
+        }
+
+        .about p {
+            max-width: 850px;
+            font-size: 17px;
+            margin-bottom: 16px;
+        }
+
+        /* Cards */
+
+        .cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 24px;
+        }
+
+        .card {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            border: 1px solid #e2e8f0;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 12px 25px rgba(15, 23, 42, 0.08);
+        }
+
+        .card h3 {
+            color: #0f172a;
+            margin-bottom: 12px;
+        }
+
+        .card p {
+            color: #64748b;
+        }
+
+        .tag {
+            display: inline-block;
+            margin-top: 18px;
+            margin-right: 5px;
+            padding: 5px 10px;
+            background: #e0f2fe;
+            color: #0369a1;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        /* Skills */
+
+        .skills {
+            background: #f1f5f9;
+        }
+
+        /* Personal */
+
+        .personal {
+            background: white;
+        }
+
+        .personal-card {
+            font-size: 36px;
+            margin-bottom: 15px;
+        }
+
+        /* Contact */
+
+        .contact {
+            background: #0f172a;
+            color: white;
+            text-align: center;
+        }
+
+        .contact .section-title {
+            color: white;
+        }
+
+        .contact p {
+            color: #cbd5e1;
+            margin: 0 auto 25px;
+            max-width: 600px;
+        }
+
+        footer {
+            background: #020617;
+            color: #94a3b8;
+            text-align: center;
+            padding: 22px;
+            font-size: 14px;
+        }
+
+        /* Mobile */
+
+        @media (max-width: 700px) {
+
+            nav {
+                padding: 16px 5%;
+            }
+
+            nav ul {
+                display: none;
+            }
+
+            .hero {
+                padding: 70px 7%;
+                min-height: 70vh;
+            }
+
+            .hero h1 {
+                font-size: 40px;
+            }
+
+            .hero h2 {
+                font-size: 20px;
+            }
+
+            section {
+                padding: 65px 7%;
+            }
+        }
+    </style>
 </head>
 
 <body>
-    <h1>Jayaprakash Kupparaju</h1>
 
-    <p>Cloud | DevOps | Automation | SRE | AI</p>
+<!-- Navigation -->
 
-    <p>Welcome to my personal website.</p>
+<nav>
+    <div class="logo">JK</div>
 
-    <h2>Projects</h2>
-    <p>Coming soon...</p>
+    <ul>
+        <li><a href="#about">About</a></li>
+        <li><a href="#projects">Projects</a></li>
+        <li><a href="#skills">Skills</a></li>
+        <li><a href="#toastmasters">Toastmasters</a></li>
+        <li><a href="#running">Running</a></li>
+        <li><a href="#blog">Blog</a></li>
+    </ul>
+</nav>
 
-    <h2>Toastmasters</h2>
-    <p>Coming soon...</p>
 
-    <h2>Running</h2>
-    <p>Coming soon...</p>
+<!-- Hero -->
 
-    <h2>Blog</h2>
-    <p>Coming soon...</p>
+<header class="hero">
+
+    <div class="hero-content">
+
+        <div class="hero-small">HELLO, I'M</div>
+
+        <h1>Jayaprakash Kupparaju</h1>
+
+        <h2>
+            Cloud • DevOps • SRE • Automation • AI
+        </h2>
+
+        <p>
+            Technology professional passionate about building reliable systems,
+            automating repetitive work and continuously learning.
+            Outside technology, I enjoy public speaking, running and writing
+            about what I learn along the way.
+        </p>
+
+        <a class="button" href="#projects">Explore My Projects</a>
+        <a class="button secondary" href="#about">About Me</a>
+
+    </div>
+
+</header>
+
+
+<!-- About -->
+
+<section id="about" class="about">
+
+    <h2 class="section-title">About Me</h2>
+
+    <p>
+        I work at the intersection of cloud engineering, DevOps, release
+        management, automation and Site Reliability Engineering.
+    </p>
+
+    <p>
+        I enjoy solving operational problems through automation and building
+        tools that reduce manual effort, improve reliability and make
+        engineering teams more productive.
+    </p>
+
+    <p>
+        This website is also my personal learning space where I document
+        projects, experiments, public speaking experiences, running and ideas
+        that I pick up along the way.
+    </p>
+
+</section>
+
+
+<!-- Projects -->
+
+<section id="projects">
+
+    <h2 class="section-title">Projects</h2>
+
+    <p class="section-description">
+        A selection of automation, DevOps, SRE and AI projects I've worked on
+        and experiments I'm building.
+    </p>
+
+    <div class="cards">
+
+        <div class="card">
+            <h3>Deployment Automation</h3>
+
+            <p>
+                Automation designed to simplify high-volume deployment
+                operations and significantly reduce repetitive manual work.
+            </p>
+
+            <span class="tag">Automation</span>
+            <span class="tag">Azure DevOps</span>
+            <span class="tag">Power Automate</span>
+        </div>
+
+
+        <div class="card">
+
+            <h3>SRE & Incident Automation</h3>
+
+            <p>
+                Exploring intelligent automation for incident investigation,
+                operational workflows and reliability engineering.
+            </p>
+
+            <span class="tag">SRE</span>
+            <span class="tag">Azure</span>
+            <span class="tag">AI Agents</span>
+
+        </div>
+
+
+        <div class="card">
+
+            <h3>This Website</h3>
+
+            <p>
+                Building this website as a hands-on engineering lab for
+                CI/CD, Infrastructure as Code, observability, cloud and AI.
+            </p>
+
+            <span class="tag">GitHub</span>
+            <span class="tag">CI/CD</span>
+            <span class="tag">Azure</span>
+
+        </div>
+
+    </div>
+
+</section>
+
+
+<!-- Skills -->
+
+<section id="skills" class="skills">
+
+    <h2 class="section-title">Technology & Skills</h2>
+
+    <p class="section-description">
+        Technologies and engineering areas I work with and continue to explore.
+    </p>
+
+    <div class="cards">
+
+        <div class="card">
+            <h3>Cloud</h3>
+            <p>Microsoft Azure • Cloud Operations • Platform Engineering</p>
+        </div>
+
+        <div class="card">
+            <h3>DevOps</h3>
+            <p>Azure DevOps • GitHub • CI/CD • Release Engineering</p>
+        </div>
+
+        <div class="card">
+            <h3>Automation</h3>
+            <p>PowerShell • Power Automate • Logic Apps • Infrastructure Automation</p>
+        </div>
+
+        <div class="card">
+            <h3>SRE</h3>
+            <p>Reliability • Observability • Incident Management • Operational Excellence</p>
+        </div>
+
+        <div class="card">
+            <h3>AI</h3>
+            <p>AI Agents • Azure AI • Workflow Automation • RAG</p>
+        </div>
+
+    </div>
+
+</section>
+
+
+<!-- Toastmasters -->
+
+<section id="toastmasters" class="personal">
+
+    <h2 class="section-title">Toastmasters & Public Speaking</h2>
+
+    <p class="section-description">
+        Public speaking is a journey I'm actively working on.
+        I'll use this space to share speeches, experiences and lessons
+        from Toastmasters.
+    </p>
+
+    <div class="cards">
+
+        <div class="card">
+            <div class="personal-card">🎤</div>
+            <h3>My Speeches</h3>
+            <p>
+                Speech scripts, topics and lessons learned from preparing
+                and delivering Toastmasters speeches.
+            </p>
+        </div>
+
+        <div class="card">
+            <div class="personal-card">💬</div>
+            <h3>Communication</h3>
+            <p>
+                Notes and lessons about becoming a more confident and
+                effective communicator.
+            </p>
+        </div>
+
+    </div>
+
+</section>
+
+
+<!-- Running -->
+
+<section id="running">
+
+    <h2 class="section-title">Running</h2>
+
+    <p class="section-description">
+        Documenting my running journey, training experiences, races and
+        things I'm learning about endurance and consistency.
+    </p>
+
+    <div class="cards">
+
+        <div class="card">
+            <div class="personal-card">🏃</div>
+            <h3>Running Journey</h3>
+            <p>
+                Training progress, race experiences and lessons learned
+                while becoming a better runner.
+            </p>
+        </div>
+
+        <div class="card">
+            <div class="personal-card">🏁</div>
+            <h3>Race Experiences</h3>
+            <p>
+                Stories and reflections from races and running challenges.
+            </p>
+        </div>
+
+    </div>
+
+</section>
+
+
+<!-- Blog -->
+
+<section id="blog" class="personal">
+
+    <h2 class="section-title">Blog</h2>
+
+    <p class="section-description">
+        Notes and thoughts about technology, AI, career, communication,
+        running and continuous learning.
+    </p>
+
+    <div class="cards">
+
+        <div class="card">
+            <h3>Technology & AI</h3>
+            <p>
+                Things I'm learning about cloud engineering, automation,
+                AI agents and modern engineering practices.
+            </p>
+        </div>
+
+        <div class="card">
+            <h3>Learning & Career</h3>
+            <p>
+                Thoughts about continuous learning, career development
+                and investing in long-term skills.
+            </p>
+        </div>
+
+        <div class="card">
+            <h3>Life & Running</h3>
+            <p>
+                Reflections from running, communication and everyday
+                experiences.
+            </p>
+        </div>
+
+    </div>
+
+</section>
+
+
+<!-- Contact -->
+
+<section class="contact">
+
+    <h2 class="section-title">Let's Connect</h2>
+
+    <p>
+        I'm always interested in learning, exchanging ideas and connecting
+        with people working in cloud, DevOps, SRE, automation and AI.
+    </p>
+
+    <!-- Add your LinkedIn URL later -->
+    <a class="button" href="#">LinkedIn</a>
+
+</section>
+
+
+<footer>
+
+    © 2026 Jayaprakash Kupparaju • Built and continuously improved through learning.
+
+</footer>
+
 </body>
 </html>
