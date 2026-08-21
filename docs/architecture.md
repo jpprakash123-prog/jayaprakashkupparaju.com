@@ -27,7 +27,7 @@ GitHub Pages
      |
      v
 GitHub Repository
-jpprakash123-prog/jayaprakashkupparaju.com
+<GITHUB_OWNER>/jayaprakashkupparaju.com
      |
      v
 index.html + static assets
@@ -70,7 +70,7 @@ The root domain currently points to the GitHub Pages IPv4 addresses:
 ```text
 Type:   CNAME
 Name:   www
-Target: jpprakash123-prog.github.io
+Target: <GITHUB_OWNER>.github.io
 ```
 
 These records allow the custom domain to resolve to the GitHub Pages hosting infrastructure.
@@ -82,7 +82,7 @@ These records allow the custom domain to resolve to the GitHub Pages hosting inf
 **Repository**
 
 ```text
-jpprakash123-prog/jayaprakashkupparaju.com
+<GITHUB_OWNER>/jayaprakashkupparaju.com
 ```
 
 The repository currently contains the static website source code and assets.

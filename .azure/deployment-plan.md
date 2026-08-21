@@ -14,7 +14,7 @@ Deploy the existing static website to Azure Static Web Apps as a parallel target
 - Workload: static HTML and image assets served directly from the repository root.
 - Entry point: `index.html`.
 - Build system: none; no package manager, compilation, API, or generated output directory.
-- Source repository: `jpprakash123-prog/jayaprakashkupparaju.com` on GitHub.
+- Source repository: `<GITHUB_OWNER>/jayaprakashkupparaju.com` on GitHub.
 - Current production path: Cloudflare DNS to GitHub Pages.
 - Current GitHub Pages artifacts: root-level `CNAME` and built-in Pages deployment.
 - Specialized technology scan: no Azure Functions or GitHub Copilot SDK markers found.
@@ -106,7 +106,7 @@ Azure Static Web Apps uses an app-count subscription limit rather than a vCPU-st
 
 | Check | Command or method | Result | Timestamp |
 |---|---|---|---|
-| Azure authentication | `Get-AzContext` for the approved subscription | Pass — `JayaprakashHomeSubscription` | 2026-08-20T23:40:32-05:00 |
+| Azure authentication | `Get-AzContext` for the approved subscription | Pass — subscription verified out of band | 2026-08-20T23:40:32-05:00 |
 | Provider registration | `Get-AzResourceProvider -ProviderNamespace Microsoft.Web` | Pass — Registered | 2026-08-20T23:40:32-05:00 |
 | Capacity | `Get-AzStaticWebApp` plus documented Free-plan limit | Pass — 0 existing + 1 planned <= 10 | 2026-08-20T23:40:32-05:00 |
 | Region availability | `Microsoft.Web/staticSites` provider locations | Pass — Central US supported | 2026-08-20T23:40:32-05:00 |
@@ -140,7 +140,7 @@ If Azure deployment or validation fails, no DNS rollback is needed because traff
 - [x] Confirm Central US location.
 - [x] User approves this plan.
 - [x] Authenticate using the installed Azure PowerShell modules.
-- [x] Resolve subscription name (`JayaprakashHomeSubscription`) and verify selected subscription.
+- [x] Resolve and verify the selected subscription out of band.
 - [x] Verify `Microsoft.Web` registration and Static Web Apps app-count limit (0 existing; 1 planned; limit 10).
 - [x] Generate the Azure deployment workflow.
 - [x] Run pre-deployment validation and record proof.

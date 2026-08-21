@@ -384,6 +384,10 @@ Architecture documentation:
 
 [`docs/architecture.md`](docs/architecture.md)
 
+Repository security and sensitive-information policy:
+
+[`SECURITY.md`](SECURITY.md)
+
 Detailed SRE learning roadmap:
 
 [`SRE_LEARNING_ROADMAP.md`](SRE_LEARNING_ROADMAP.md)

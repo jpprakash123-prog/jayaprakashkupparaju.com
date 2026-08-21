@@ -1,0 +1,3 @@
+# Local Azure PowerShell state
+.azure/AzureRmSurvey.json
+.azure/PSConfig.json
