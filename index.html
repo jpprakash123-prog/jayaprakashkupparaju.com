@@ -116,12 +116,20 @@
             font-weight: 600;
         }
 
+        .button:hover {
+            background: #0369a1;
+        }
+
         .button.secondary {
             background: transparent;
             border: 1px solid #64748b;
         }
 
-        /* Sections */
+        .button.secondary:hover {
+            background: rgba(255,255,255,0.08);
+        }
+
+        /* General sections */
 
         section {
             padding: 85px 10%;
@@ -139,16 +147,47 @@
             margin-bottom: 40px;
         }
 
-        /* About */
+        /* ABOUT ME */
 
         .about {
             background: white;
         }
 
-        .about p {
-            max-width: 850px;
+        .about-container {
+            display: flex;
+            align-items: center;
+            gap: 60px;
+            max-width: 1100px;
+            margin: 0 auto;
+        }
+
+        .about-photo {
+            flex-shrink: 0;
+        }
+
+        .about-photo img {
+            width: 280px;
+            height: 280px;
+            object-fit: cover;
+            border-radius: 50%;
+            border: 6px solid #f1f5f9;
+            box-shadow: 0 15px 35px rgba(15, 23, 42, 0.15);
+        }
+
+        .about-content {
+            flex: 1;
+        }
+
+        .about-content p {
             font-size: 17px;
             margin-bottom: 16px;
+            color: #475569;
+        }
+
+        .about-highlight {
+            font-size: 20px !important;
+            color: #0f172a !important;
+            font-weight: 500;
         }
 
         /* Cards */
@@ -264,6 +303,17 @@
             section {
                 padding: 65px 7%;
             }
+
+            .about-container {
+                flex-direction: column;
+                text-align: center;
+                gap: 35px;
+            }
+
+            .about-photo img {
+                width: 220px;
+                height: 220px;
+            }
         }
     </style>
 </head>
@@ -296,9 +346,7 @@
 
         <h1>Jayaprakash Kupparaju</h1>
 
-        <h2>
-            Cloud • DevOps • SRE • Automation • AI
-        </h2>
+        <h2>Cloud • DevOps • SRE • Automation • AI</h2>
 
         <p>
             Technology professional passionate about building reliable systems,
@@ -315,28 +363,62 @@
 </header>
 
 
-<!-- About -->
+<!-- ABOUT ME WITH PROFILE PHOTO -->
 
 <section id="about" class="about">
 
-    <h2 class="section-title">About Me</h2>
+    <div class="about-container">
 
-    <p>
-        I work at the intersection of cloud engineering, DevOps, release
-        management, automation and Site Reliability Engineering.
-    </p>
+        <div class="about-photo">
 
-    <p>
-        I enjoy solving operational problems through automation and building
-        tools that reduce manual effort, improve reliability and make
-        engineering teams more productive.
-    </p>
+            <!--
+                Upload your picture to the GitHub repository
+                and name it profile.jpg
+            -->
 
-    <p>
-        This website is also my personal learning space where I document
-        projects, experiments, public speaking experiences, running and ideas
-        that I pick up along the way.
-    </p>
+            <img src="profile.jpg"
+                 alt="Jayaprakash Kupparaju">
+
+        </div>
+
+
+        <div class="about-content">
+
+            <h2 class="section-title">About Me</h2>
+
+            <p class="about-highlight">
+                I enjoy solving complex operational problems through
+                engineering and automation.
+            </p>
+
+            <p>
+                I work at the intersection of cloud engineering, DevOps,
+                release management, automation and Site Reliability Engineering.
+            </p>
+
+            <p>
+                I'm particularly interested in finding repetitive or
+                time-consuming operational processes and building automation
+                that reduces manual effort, improves reliability and helps
+                engineering teams work more efficiently.
+            </p>
+
+            <p>
+                I'm also continuously exploring AI and intelligent automation
+                and how these technologies can be applied to real engineering
+                and operational problems.
+            </p>
+
+            <p>
+                This website is both my personal space and engineering
+                playground. I use it to document projects, technical
+                experiments, public speaking experiences, running and things
+                I'm learning along the way.
+            </p>
+
+        </div>
+
+    </div>
 
 </section>
 
@@ -355,6 +437,7 @@
     <div class="cards">
 
         <div class="card">
+
             <h3>Deployment Automation</h3>
 
             <p>
@@ -365,6 +448,7 @@
             <span class="tag">Automation</span>
             <span class="tag">Azure DevOps</span>
             <span class="tag">Power Automate</span>
+
         </div>
 
 
@@ -417,28 +501,38 @@
     <div class="cards">
 
         <div class="card">
-            <h3>Cloud</h3>
-            <p>Microsoft Azure • Cloud Operations • Platform Engineering</p>
+            <h3>☁️ Cloud</h3>
+            <p>
+                Microsoft Azure • Cloud Operations • Platform Engineering
+            </p>
         </div>
 
         <div class="card">
-            <h3>DevOps</h3>
-            <p>Azure DevOps • GitHub • CI/CD • Release Engineering</p>
+            <h3>⚙️ DevOps</h3>
+            <p>
+                Azure DevOps • GitHub • CI/CD • Release Engineering
+            </p>
         </div>
 
         <div class="card">
-            <h3>Automation</h3>
-            <p>PowerShell • Power Automate • Logic Apps • Infrastructure Automation</p>
+            <h3>🤖 Automation</h3>
+            <p>
+                PowerShell • Power Automate • Logic Apps • Infrastructure Automation
+            </p>
         </div>
 
         <div class="card">
-            <h3>SRE</h3>
-            <p>Reliability • Observability • Incident Management • Operational Excellence</p>
+            <h3>📊 SRE</h3>
+            <p>
+                Reliability • Observability • Incident Management • Operational Excellence
+            </p>
         </div>
 
         <div class="card">
-            <h3>AI</h3>
-            <p>AI Agents • Azure AI • Workflow Automation • RAG</p>
+            <h3>🧠 AI</h3>
+            <p>
+                AI Agents • Azure AI • Workflow Automation • RAG
+            </p>
         </div>
 
     </div>
@@ -454,28 +548,37 @@
 
     <p class="section-description">
         Public speaking is a journey I'm actively working on.
-        I'll use this space to share speeches, experiences and lessons
+        I use this space to share speeches, experiences and lessons
         from Toastmasters.
     </p>
 
     <div class="cards">
 
         <div class="card">
+
             <div class="personal-card">🎤</div>
+
             <h3>My Speeches</h3>
+
             <p>
                 Speech scripts, topics and lessons learned from preparing
                 and delivering Toastmasters speeches.
             </p>
+
         </div>
 
+
         <div class="card">
+
             <div class="personal-card">💬</div>
+
             <h3>Communication</h3>
+
             <p>
                 Notes and lessons about becoming a more confident and
                 effective communicator.
             </p>
+
         </div>
 
     </div>
@@ -497,20 +600,29 @@
     <div class="cards">
 
         <div class="card">
+
             <div class="personal-card">🏃</div>
+
             <h3>Running Journey</h3>
+
             <p>
                 Training progress, race experiences and lessons learned
                 while becoming a better runner.
             </p>
+
         </div>
 
+
         <div class="card">
+
             <div class="personal-card">🏁</div>
+
             <h3>Race Experiences</h3>
+
             <p>
                 Stories and reflections from races and running challenges.
             </p>
+
         </div>
 
     </div>
@@ -532,27 +644,38 @@
     <div class="cards">
 
         <div class="card">
+
             <h3>Technology & AI</h3>
+
             <p>
                 Things I'm learning about cloud engineering, automation,
                 AI agents and modern engineering practices.
             </p>
+
         </div>
 
+
         <div class="card">
+
             <h3>Learning & Career</h3>
+
             <p>
                 Thoughts about continuous learning, career development
                 and investing in long-term skills.
             </p>
+
         </div>
 
+
         <div class="card">
+
             <h3>Life & Running</h3>
+
             <p>
                 Reflections from running, communication and everyday
                 experiences.
             </p>
+
         </div>
 
     </div>
@@ -571,16 +694,15 @@
         with people working in cloud, DevOps, SRE, automation and AI.
     </p>
 
-    <!-- Add your LinkedIn URL later -->
-    <a class="button" href="#">LinkedIn</a>
+    <a class="button" href="#">
+        LinkedIn
+    </a>
 
 </section>
 
 
 <footer>
-
     © 2026 Jayaprakash Kupparaju • Built and continuously improved through learning.
-
 </footer>
 
 </body>
