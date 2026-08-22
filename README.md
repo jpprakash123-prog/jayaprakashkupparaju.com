@@ -384,6 +384,10 @@ Architecture documentation:
 
 [`docs/architecture.md`](docs/architecture.md)
 
+Azure deployment documentation:
+
+[`docs/deployment.md`](docs/deployment.md)
+
 Repository security and sensitive-information policy:
 
 [`SECURITY.md`](SECURITY.md)

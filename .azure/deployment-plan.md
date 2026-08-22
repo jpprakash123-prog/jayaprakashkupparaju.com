@@ -2,7 +2,7 @@
 
 ## Status
 
-Validated — all applicable pre-deployment checks passed; DNS safety gates remain in force.
+Deployed — Azure endpoint and GitHub Actions deployment validated; DNS safety gates remain in force.
 
 ## Objective
 
@@ -144,9 +144,9 @@ If Azure deployment or validation fails, no DNS rollback is needed because traff
 - [x] Verify `Microsoft.Web` registration and Static Web Apps app-count limit (0 existing; 1 planned; limit 10).
 - [x] Generate the Azure deployment workflow.
 - [x] Run pre-deployment validation and record proof.
-- [ ] Deploy the Azure resource and website.
-- [ ] Validate the generated HTTPS endpoint.
-- [ ] Document the parallel deployment.
+- [x] Deploy the Azure resource and website.
+- [x] Validate the generated HTTPS endpoint.
+- [x] Document the parallel deployment.
 - [ ] Separately approve any future custom-domain/DNS cutover.
 
 ## Files Expected During Execution
@@ -168,8 +168,18 @@ If Azure deployment or validation fails, no DNS rollback is needed because traff
 
 ## Functional Verification
 
-- Status: source verified; deployed endpoint verification pending.
+- Status: verified locally at source level and against the deployed HTTPS endpoint.
 - Backend: not applicable.
 - UI source: valid HTML document marker and non-empty title found; `profile.jpg` reference resolves to an existing JPEG file.
 - Workflow isolation: confirmed that only `index.html` and `profile.jpg` are staged for Azure; `CNAME` is excluded.
-- Local HTTP rendering: unavailable because the workspace sandbox blocked starting a local server. Equivalent source checks passed, and real rendering will be checked against the generated Azure HTTPS endpoint.
+- Deployed rendering: the root page returned HTTP 200 with the expected title, and `profile.jpg` returned HTTP 200 with an image content type.
+
+## Deployment Result
+
+- GitHub Actions run: successful.
+- Azure endpoint: `https://black-dune-07c4abe10.7.azurestaticapps.net`.
+- Deployment contents: `index.html` and `profile.jpg` only.
+- GitHub Actions secret: `AZURE_STATIC_WEB_APPS_API_TOKEN` exists as an encrypted repository secret; its value is not present in repository files.
+- Custom domains attached to Azure: 0.
+- GitHub Pages `CNAME`: unchanged.
+- Cloudflare DNS: unchanged.

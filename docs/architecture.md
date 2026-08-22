@@ -324,6 +324,31 @@ GitOps
 
 ---
 
+## Current Phase 1 Parallel Deployment
+
+The static website is now deployed to Azure Static Web Apps and validated at
+its Azure-provided HTTPS endpoint. GitHub Actions deploys only `index.html` and
+`profile.jpg` from the repository.
+
+```text
+GitHub repository
+   |-- GitHub Pages (current custom-domain host)
+   |
+   `-- GitHub Actions
+          |
+          v
+      Azure Static Web Apps
+          |
+          v
+      azurestaticapps.net HTTPS endpoint
+```
+
+The Cloudflare DNS records and repository `CNAME` remain unchanged. Therefore,
+the custom domain continues to use GitHub Pages while the Azure deployment is
+available for parallel validation.
+
+---
+
 ## Next Step
 
 Proceed to **Phase 1 — Azure Static Web Apps**.
