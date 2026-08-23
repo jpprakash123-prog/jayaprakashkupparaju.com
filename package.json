@@ -1,0 +1,19 @@
+{
+  "name": "personal-site-sre-lab",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Validation and build tooling for the personal website SRE lab.",
+  "scripts": {
+    "build": "node scripts/build.mjs",
+    "lint:html": "html-validate index.html",
+    "security": "node scripts/check-sensitive-data.mjs",
+    "test": "node --test tests",
+    "ci": "npm run lint:html && npm test && npm run security && npm run build"
+  },
+  "devDependencies": {
+    "html-validate": "10.0.0"
+  },
+  "engines": {
+    "node": ">=20.6.0"
+  }
+}

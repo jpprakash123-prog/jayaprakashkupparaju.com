@@ -354,18 +354,18 @@ Production Deployment
 
 ## Tasks
 
-- [ ] Learn Git feature branches.
+- [x] Learn Git feature branches.
 - [ ] Protect `main`.
 - [ ] Require Pull Requests.
-- [ ] Create `.github/workflows/ci.yml`.
-- [ ] Validate HTML.
-- [ ] Add linting.
-- [ ] Add basic automated tests.
-- [ ] Add dependency/security scanning where applicable.
-- [ ] Deploy only after successful CI.
+- [x] Create `.github/workflows/ci.yml`.
+- [x] Validate HTML.
+- [x] Add linting.
+- [x] Add basic automated tests.
+- [x] Add dependency/security scanning where applicable.
+- [x] Deploy only after successful CI.
 - [ ] Create a GitHub `DEV` environment.
 - [ ] Create a GitHub `PROD` environment.
-- [ ] Store deployment secrets securely.
+- [x] Store deployment secrets securely.
 - [ ] Add deployment approval for production.
 - [ ] Practice a rollback.
 - [ ] Document the rollback procedure.

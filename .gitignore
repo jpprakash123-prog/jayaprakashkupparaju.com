@@ -1,3 +1,7 @@
 # Local Azure PowerShell state
 .azure/AzureRmSurvey.json
 .azure/PSConfig.json
+
+# Node.js dependencies and generated site output
+node_modules/
+dist/
