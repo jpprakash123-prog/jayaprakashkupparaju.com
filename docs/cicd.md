@@ -23,6 +23,9 @@ Continuous Integration
 Review and merge to main
       |
       v
+Production approval
+      |
+      v
 Azure Static Web Apps deployment
 ```
 
@@ -43,11 +46,14 @@ The build command creates `dist/` containing only `index.html` and
 
 - `.github/workflows/ci.yml` validates pushes and pull requests targeting
   `main`.
-- `.github/workflows/azure-static-web-apps.yml` deploys merged changes to Azure
-  Static Web Apps.
+- `.github/workflows/azure-static-web-apps.yml` deploys pull requests through
+  the `DEV` environment and merged changes through the approval-gated `PROD`
+  environment.
 
-The Azure deployment token remains in an encrypted GitHub Actions secret and is
-not available to the CI workflow.
+The Azure deployment token is stored separately as an encrypted environment
+secret in `DEV` and `PROD`. It is not available to the CI workflow. `PROD`
+allows deployments only from protected branches and requires approval before
+its secret is released to a job.
 
 ## Intended Change Process
 
@@ -57,7 +63,8 @@ not available to the CI workflow.
 4. Wait for all required checks to pass.
 5. Review the diff and approve the pull request.
 6. Merge to `main`.
-7. Verify the Azure deployment workflow and live endpoint.
+7. Approve the pending `PROD` deployment in GitHub Actions.
+8. Verify the Azure deployment workflow and live endpoint.
 
-Branch protection and required-review settings will be enabled after this first
-CI pull request proves that the checks work correctly.
+The `main` branch is protected and requires the `Validate static website`
+status check. Force pushes and branch deletion are blocked.

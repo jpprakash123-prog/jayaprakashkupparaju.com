@@ -363,10 +363,10 @@ Production Deployment
 - [x] Add basic automated tests.
 - [x] Add dependency/security scanning where applicable.
 - [x] Deploy only after successful CI.
-- [ ] Create a GitHub `DEV` environment.
-- [ ] Create a GitHub `PROD` environment.
+- [x] Create a GitHub `DEV` environment.
+- [x] Create a GitHub `PROD` environment.
 - [x] Store deployment secrets securely.
-- [ ] Add deployment approval for production.
+- [x] Add deployment approval for production.
 - [ ] Practice a rollback.
 - [ ] Document the rollback procedure.
 
