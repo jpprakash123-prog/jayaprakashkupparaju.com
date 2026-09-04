@@ -2,9 +2,9 @@
 
 ## Status
 
-Validated — manual, approval-gated emergency rollback workflow is ready for a
-pull request. The Azure endpoint remains deployed and DNS safety gates remain
-in force.
+Validated — public deployment version metadata is ready for an Azure preview,
+normal production, and rollback deployment pull request. The Azure endpoint
+remains deployed and DNS safety gates remain in force.
 
 ## Objective
 
@@ -122,6 +122,12 @@ Azure Static Web Apps uses an app-count subscription limit rather than a vCPU-st
 | Rollback target control | Static review of SHA format and `main` ancestry checks | Pass — unmerged commits rejected | 2026-09-03 |
 | Rollback secret isolation | Static review of job environment and permissions | Pass — token limited to approval-gated `PROD` job | 2026-09-03 |
 | Rollback RBAC | Static infrastructure and application review | Not applicable — no identity or role changes | 2026-09-03 |
+| Metadata workflow and script format | `prettier@3.6.2 --check` on modified executable, workflow, and documentation files | Pass | 2026-09-03 |
+| Metadata build verification | `npm run ci` | Pass — HTML, tests, sensitive-data scan, and build | 2026-09-03 |
+| Metadata functional verification | Generate and parse `dist/deployment-info.json` with representative deployment values | Pass — content commit, type, run ID, UTC, and Central weekday values verified | 2026-09-03 |
+| Metadata input validation | Run generator with a malformed commit value | Pass — rejected with nonzero exit | 2026-09-03 |
+| Metadata exposure review | Static review of generated fields | Pass — public build provenance only; no identity, account, or secret fields | 2026-09-03 |
+| Metadata RBAC | Static infrastructure and application review | Not applicable — no identity or role changes | 2026-09-03 |
 
 Validated by: Azure validation workflow.
 
@@ -189,6 +195,23 @@ Approved by the user on 2026-09-03.
   secret.
 - Serialize normal and rollback production deployments through a shared
   concurrency group.
+- Keep GitHub Pages and public DNS unchanged.
+
+## 10. Deployment Version Metadata
+
+Approved by the user on 2026-09-03.
+
+- Generate `deployment-info.json` inside the built `dist/` directory immediately
+  before each Azure deployment.
+- Include the actual content commit, deployment type, workflow run ID, an ISO
+  UTC timestamp, and a human-readable timestamp with weekday in America/Chicago
+  time.
+- Generate rollback metadata from the requested rollback commit rather than the
+  commit containing the workflow definition.
+- Publish only non-sensitive build provenance; do not include users, account
+  identifiers, subscription identifiers, or secrets.
+- Keep the file out of source-controlled site content because it describes a
+  specific deployment, not a source revision.
 - Keep GitHub Pages and public DNS unchanged.
 
 ## Functional Verification

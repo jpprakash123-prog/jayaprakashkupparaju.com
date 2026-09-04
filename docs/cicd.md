@@ -55,6 +55,37 @@ secret in `DEV` and `PROD`. It is not available to the CI workflow. `PROD`
 allows deployments only from protected branches and requires approval before
 its secret is released to a job.
 
+## Live Deployment Version
+
+Every Azure preview, production, and rollback deployment publishes a public
+`deployment-info.json` file at the root of that deployment. For example:
+
+```text
+https://<azure-static-web-app-hostname>/deployment-info.json
+```
+
+The file identifies the commit whose website content was built, rather than the
+commit that merely started the workflow. This distinction is important for an
+emergency rollback, where the workflow runs from current `main` but deploys an
+older known-good commit.
+
+```json
+{
+  "schema_version": 1,
+  "content_commit": "<40-character-commit-sha>",
+  "content_commit_short": "<7-character-sha>",
+  "deployment_type": "production",
+  "workflow_run_id": "<run-id>",
+  "deployed_at_utc": "2026-09-04T03:30:00.000Z",
+  "deployed_at_central": "Thursday, September 3, 2026 at 10:30:00 PM CDT"
+}
+```
+
+The UTC value is machine-readable and unambiguous. The Central Time value is
+intended for human incident review and includes the weekday and time-zone
+abbreviation. The file contains no credentials, user identity, account data, or
+Azure subscription information.
+
 ## Intended Change Process
 
 1. Create a feature branch from an up-to-date `main`.

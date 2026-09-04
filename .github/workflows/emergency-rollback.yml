@@ -69,6 +69,13 @@ jobs:
         with:
           ref: ${{ inputs.commit_sha }}
 
+      - name: Check out deployment metadata tool
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+          path: .deployment-tools
+          sparse-checkout: scripts/write-deployment-info.mjs
+
       - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
@@ -80,6 +87,12 @@ jobs:
 
       - name: Build static website
         run: npm run build
+
+      - name: Add rollback deployment metadata
+        env:
+          DEPLOYMENT_COMMIT: ${{ inputs.commit_sha }}
+          DEPLOYMENT_TYPE: rollback
+        run: node .deployment-tools/scripts/write-deployment-info.mjs
 
       - name: Deploy rollback to Azure production
         uses: Azure/static-web-apps-deploy@v1
