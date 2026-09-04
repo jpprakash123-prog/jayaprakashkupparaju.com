@@ -2,7 +2,9 @@
 
 ## Status
 
-Deployed — Azure endpoint and GitHub Actions deployment validated; DNS safety gates remain in force.
+Validated — manual, approval-gated emergency rollback workflow is ready for a
+pull request. The Azure endpoint remains deployed and DNS safety gates remain
+in force.
 
 ## Objective
 
@@ -115,6 +117,11 @@ Azure Static Web Apps uses an app-count subscription limit rather than a vCPU-st
 | Workflow YAML | `npx --yes prettier@3.6.2 --check .github/workflows/azure-static-web-apps.yml` | Pass | 2026-08-20T23:40:32-05:00 |
 | Site source | HTML/JPEG/reference checks | Pass | 2026-08-20T23:40:32-05:00 |
 | GitHub Pages safety | Git blob hash comparison for `CNAME` | Pass — unchanged | 2026-08-20T23:40:32-05:00 |
+| Rollback workflow YAML | `prettier@3.6.2 --check` on workflow and plan files | Pass | 2026-09-03 |
+| Rollback workflow build | `npm run ci` | Pass — HTML, tests, sensitive-data scan, and build | 2026-09-03 |
+| Rollback target control | Static review of SHA format and `main` ancestry checks | Pass — unmerged commits rejected | 2026-09-03 |
+| Rollback secret isolation | Static review of job environment and permissions | Pass — token limited to approval-gated `PROD` job | 2026-09-03 |
+| Rollback RBAC | Static infrastructure and application review | Not applicable — no identity or role changes | 2026-09-03 |
 
 Validated by: Azure validation workflow.
 
@@ -165,6 +172,24 @@ If Azure deployment or validation fails, no DNS rollback is needed because traff
 - The workflow stages only `index.html` and `profile.jpg` into a temporary `_site` directory. This avoids publishing repository documentation or the GitHub Pages `CNAME` file to Azure.
 - The Azure deployment token will be stored only as the masked GitHub Actions secret `AZURE_STATIC_WEB_APPS_API_TOKEN`; it will not be written to repository files, command output, Bicep outputs, or deployment logs.
 - The initial resource will not contain a custom-domain binding, preserving the existing Cloudflare-to-GitHub Pages request path.
+
+## 9. Emergency Rollback Workflow
+
+Approved by the user on 2026-09-03.
+
+- Add a separate manually triggered GitHub Actions workflow.
+- Require an exact 40-character commit SHA as the rollback target.
+- Reject commits that are not ancestors of `main`, preventing deployment of
+  unmerged code through the emergency path.
+- Run the existing CI suite before making a production deployment available for
+  approval.
+- Rebuild the verified commit after approval instead of retaining a deployment
+  artifact.
+- Use the existing protected `PROD` environment and its encrypted environment
+  secret.
+- Serialize normal and rollback production deployments through a shared
+  concurrency group.
+- Keep GitHub Pages and public DNS unchanged.
 
 ## Functional Verification
 
