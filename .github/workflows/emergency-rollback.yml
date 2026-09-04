@@ -1,0 +1,93 @@
+name: Emergency rollback Azure production
+
+run-name: Roll back Azure production to ${{ inputs.commit_sha }}
+
+on:
+  workflow_dispatch:
+    inputs:
+      commit_sha:
+        description: Exact 40-character SHA of a known-good commit on main
+        required: true
+        type: string
+
+permissions:
+  contents: read
+
+jobs:
+  validate_candidate:
+    runs-on: ubuntu-latest
+    name: Validate rollback candidate
+    steps:
+      - name: Validate commit format
+        env:
+          ROLLBACK_SHA: ${{ inputs.commit_sha }}
+        run: |
+          if [[ ! "$ROLLBACK_SHA" =~ ^[0-9a-fA-F]{40}$ ]]; then
+            echo "The rollback target must be an exact 40-character commit SHA."
+            exit 1
+          fi
+
+      - name: Check out rollback candidate
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.commit_sha }}
+          fetch-depth: 0
+
+      - name: Verify commit belongs to main
+        env:
+          ROLLBACK_SHA: ${{ inputs.commit_sha }}
+        run: |
+          git fetch --no-tags origin main
+          if ! git merge-base --is-ancestor "$ROLLBACK_SHA" origin/main; then
+            echo "The rollback target is not part of main."
+            exit 1
+          fi
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: npm
+
+      - name: Install validation tools
+        run: npm ci
+
+      - name: Validate rollback candidate
+        run: npm run ci
+
+  deploy_rollback:
+    needs: validate_candidate
+    runs-on: ubuntu-latest
+    name: Deploy approved rollback
+    environment: PROD
+    concurrency:
+      group: azure-static-web-apps-production
+      cancel-in-progress: false
+    steps:
+      - name: Check out verified rollback candidate
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.commit_sha }}
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: npm
+
+      - name: Install build tools
+        run: npm ci
+
+      - name: Build static website
+        run: npm run build
+
+      - name: Deploy rollback to Azure production
+        uses: Azure/static-web-apps-deploy@v1
+        with:
+          azure_static_web_apps_api_token: ${{ secrets.AZURE_STATIC_WEB_APPS_API_TOKEN }}
+          repo_token: ${{ secrets.GITHUB_TOKEN }}
+          action: upload
+          app_location: dist
+          api_location: ""
+          output_location: ""
+          skip_app_build: true

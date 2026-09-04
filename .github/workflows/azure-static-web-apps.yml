@@ -63,6 +63,9 @@ jobs:
     runs-on: ubuntu-latest
     name: Deploy production
     environment: PROD
+    concurrency:
+      group: azure-static-web-apps-production
+      cancel-in-progress: false
     steps:
       - uses: actions/checkout@v4
 
