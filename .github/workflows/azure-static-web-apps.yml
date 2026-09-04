@@ -35,6 +35,12 @@ jobs:
       - name: Validate and build static website
         run: npm run ci
 
+      - name: Add preview deployment metadata
+        env:
+          DEPLOYMENT_COMMIT: ${{ github.sha }}
+          DEPLOYMENT_TYPE: preview
+        run: node scripts/write-deployment-info.mjs
+
       - name: Deploy
         uses: Azure/static-web-apps-deploy@v1
         with:
@@ -80,6 +86,12 @@ jobs:
 
       - name: Validate and build static website
         run: npm run ci
+
+      - name: Add production deployment metadata
+        env:
+          DEPLOYMENT_COMMIT: ${{ github.sha }}
+          DEPLOYMENT_TYPE: production
+        run: node scripts/write-deployment-info.mjs
 
       - name: Deploy
         uses: Azure/static-web-apps-deploy@v1
