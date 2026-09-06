@@ -7,6 +7,11 @@ Apps. GitHub remains the source repository and GitHub Actions provides CI,
 pull-request previews, approval-gated production deployment, version metadata,
 and emergency rollback.
 
+Azure Monitor now provides a cost-controlled observability lab. A workspace-based
+Application Insights resource receives results from a Standard availability test.
+The test is disabled by default and can run only during a supervised exercise
+with an Azure Automation cutoff guard.
+
 Cloudflare manages public DNS. Both the apex domain and `www` hostname route to
 Azure. The previous GitHub Pages configuration remains temporarily available as
 a rollback target during the post-cutover observation period.
@@ -112,6 +117,31 @@ dist/
 It contains no credentials, user identities, account identifiers, or Azure
 subscription information.
 
+## Monitoring Flow
+
+```text
+Azure availability test (disabled by default)
+     |
+     | supervised HTTPS request
+     v
+jayaprakashkupparaju.com
+     |
+     v
+Application Insights -> Log Analytics -> KQL
+     |
+     v
+Availability alert -> Owner-role notification
+
+Azure Automation managed identity
+     |
+     `-- scheduled cutoff -> disable the web test
+```
+
+The Automation identity has `Monitoring Contributor` only at the individual
+web-test resource scope. The `$10` annual resource-group budget warns at early
+actual and forecast thresholds but does not stop resources. The tested runbook
+is the independent technical control that stops scheduled test executions.
+
 ## Emergency Recovery
 
 The manual emergency workflow can redeploy an exact known-good commit already
@@ -156,8 +186,8 @@ reviewed change.
 | Deployment controls          | GitHub `DEV` and approval-gated `PROD` environments |
 | Build provenance             | Public `deployment-info.json`                       |
 | Recovery                     | Emergency rollback workflow and documented runbook  |
-| Infrastructure as Code       | Not implemented                                     |
-| Monitoring and observability | Not implemented                                     |
+| Infrastructure as Code       | Bicep for the monitoring foundation                 |
+| Monitoring and observability | Application Insights, Log Analytics and web test    |
 | Containers and Kubernetes    | Not implemented                                     |
 
 ## Architecture Status
@@ -171,7 +201,8 @@ reviewed change.
 - [ ] Complete the post-cutover observation period.
 - [ ] Remove obsolete GitHub Pages custom-domain configuration.
 - [ ] Manage Azure infrastructure through Terraform.
-- [ ] Implement monitoring, observability, SLOs, and error budgets.
+- [x] Add a cost-controlled Azure availability monitoring lab.
+- [ ] Define production SLIs, SLOs, and error budgets.
 
 ## Next Architecture Stage
 
