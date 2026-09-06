@@ -33,5 +33,22 @@ test("SRE website project showcases delivery and recovery skills", () => {
   assert.match(html, /GitHub Actions/);
   assert.match(html, /Cloudflare DNS/);
   assert.match(html, /emergency rollback/i);
+  assert.match(html, /href=["']https:\/\/jayaprakashkupparaju\.com["']/);
   assert.match(html, /href=["']\/deployment-info\.json["']/);
+});
+
+test("SRE project explains the production architecture", () => {
+  assert.match(html, /How the production system works/);
+  assert.match(html, /Feature branch/);
+  assert.match(html, /DEV preview/);
+  assert.match(html, /Application Insights/);
+  assert.match(html, /Log Analytics \+ KQL/);
+  assert.match(html, /Automation cutoff/);
+  assert.match(html, /\$10 annual budget alerts/);
+});
+
+test("public professional profiles are linked securely", () => {
+  assert.match(html, /href=["']https:\/\/github\.com\/jpprakash123-prog["']/);
+  assert.match(html, /href=["']https:\/\/www\.linkedin\.com\/in\/jayaprakash-kupparaju-99108225\/["']/);
+  assert.match(html, /rel=["']noopener noreferrer["']/);
 });
