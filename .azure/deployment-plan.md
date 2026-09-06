@@ -363,7 +363,10 @@ rollback of the website, DNS, or deployment workflow is involved.
   exercise.
 - Standard web test: deployed disabled, then enabled only after the guard was
   tested and scheduled.
-- Automatic cutoff: 2026-09-07T01:06:00Z.
+- Primary automatic cutoff: 2026-09-07T01:06:00Z.
+- Independent retry cutoff: 2026-09-07T01:21:00Z. Because the runbook is
+  idempotent, this confirms the disabled state if the primary job succeeded and
+  retries the disable operation if it did not.
 
 ## Functional Verification
 
