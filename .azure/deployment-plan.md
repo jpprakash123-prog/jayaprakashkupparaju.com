@@ -2,9 +2,9 @@
 
 ## Status
 
-Validated — public deployment version metadata is ready for an Azure preview,
-normal production, and rollback deployment pull request. The Azure endpoint
-remains deployed and DNS safety gates remain in force.
+Validated — featured Azure and SRE portfolio project passed local CI, security,
+build, accessibility, dependency, and source-diff checks. It is ready for the
+Azure DEV preview and the existing reviewed production-release process.
 
 ## Objective
 
@@ -128,6 +128,11 @@ Azure Static Web Apps uses an app-count subscription limit rather than a vCPU-st
 | Metadata input validation | Run generator with a malformed commit value | Pass — rejected with nonzero exit | 2026-09-03 |
 | Metadata exposure review | Static review of generated fields | Pass — public build provenance only; no identity, account, or secret fields | 2026-09-03 |
 | Metadata RBAC | Static infrastructure and application review | Not applicable — no identity or role changes | 2026-09-03 |
+| Project showcase CI | `npm run ci` with command-scoped Git safe-directory configuration | Pass — HTML validation, 7 tests, sensitive-data scan, and build | 2026-09-06 |
+| Project showcase regression | `node --test tests` through the CI command | Pass — verifies project title, tools, rollback capability, and metadata link | 2026-09-06 |
+| Dependency security | `npm audit --audit-level=high` | Pass — 0 vulnerabilities | 2026-09-06 |
+| Source diff hygiene | `git diff --check` | Pass | 2026-09-06 |
+| Project showcase RBAC | Static infrastructure and application review | Not applicable — content-only change with no identity or role changes | 2026-09-06 |
 
 Validated by: Azure validation workflow.
 
@@ -213,6 +218,19 @@ Approved by the user on 2026-09-03.
 - Keep the file out of source-controlled site content because it describes a
   specific deployment, not a source revision.
 - Keep GitHub Pages and public DNS unchanged.
+
+## 11. Portfolio Project Showcase
+
+Approved by the user on 2026-09-06.
+
+- Replace the generic website project card with a featured case-study card.
+- Describe the Azure migration, CI/CD controls, deployment versioning, emergency
+  rollback, custom-domain validation, HTTPS, and DNS cutover.
+- Show the tools and skills used without exposing account identifiers or other
+  sensitive information.
+- Link to the public deployment metadata using a relative site URL.
+- Validate locally, deploy to an Azure DEV preview, and publish only after PR
+  review and `PROD` approval.
 
 ## Functional Verification
 

@@ -26,3 +26,12 @@ test("internal navigation targets exist", () => {
 test("automated deployment marker remains visible", () => {
   assert.match(html, /Deployed automatically with GitHub Actions\./);
 });
+
+test("SRE website project showcases delivery and recovery skills", () => {
+  assert.match(html, /Production Website SRE Lab/);
+  assert.match(html, /Azure Static Web Apps/);
+  assert.match(html, /GitHub Actions/);
+  assert.match(html, /Cloudflare DNS/);
+  assert.match(html, /emergency rollback/i);
+  assert.match(html, /href=["']\/deployment-info\.json["']/);
+});
