@@ -2,9 +2,10 @@
 
 ## Status
 
-Validated — featured Azure and SRE portfolio project passed local CI, security,
-build, accessibility, dependency, and source-diff checks. It is ready for the
-Azure DEV preview and the existing reviewed production-release process.
+Validated — the approved Azure observability lab passed Bicep compilation,
+Azure template validation, what-if review, CI, security, cost, policy, provider,
+and static RBAC checks. Deployment must create the budget before the inactive
+monitoring foundation and must not enable the web test.
 
 ## Objective
 
@@ -133,6 +134,15 @@ Azure Static Web Apps uses an app-count subscription limit rather than a vCPU-st
 | Dependency security | `npm audit --audit-level=high` | Pass — 0 vulnerabilities | 2026-09-06 |
 | Source diff hygiene | `git diff --check` | Pass | 2026-09-06 |
 | Project showcase RBAC | Static infrastructure and application review | Not applicable — content-only change with no identity or role changes | 2026-09-06 |
+| Monitoring current cost | Cost Management `ActualCost`, month-to-date, scoped to `rg-personal-site-prod` | Pass — no cost rows returned before deployment | 2026-09-06 |
+| Monitoring Bicep compilation | `az bicep build --file infrastructure/monitoring/main.bicep --stdout` | Pass | 2026-09-06 |
+| Monitoring template validation | `Test-AzResourceGroupDeployment` using the compiled template | Pass — no validation errors | 2026-09-06 |
+| Monitoring what-if | `Get-AzResourceGroupDeploymentWhatIfResult` with `ResourceIdOnly` | Pass — six creates, no deletes or changes to the Static Web App | 2026-09-06 |
+| Monitoring providers | `Get-AzResourceProvider` | Pass — Insights, Operational Insights, and Automation registered | 2026-09-06 |
+| Monitoring policy | `Get-AzPolicyAssignment` at subscription scope | Pass — three assignments reviewed; template validation found no denial | 2026-09-06 |
+| Monitoring runbook syntax | PowerShell AST parser | Pass | 2026-09-06 |
+| Monitoring CI and security | `npm run ci` with command-scoped Git safe directory | Pass — seven tests, sensitive-data scan, and build | 2026-09-06 |
+| Monitoring RBAC | Static Bicep and runbook review | Pass — system identity receives Monitoring Contributor only at the web-test resource scope | 2026-09-06 |
 
 Validated by: Azure validation workflow.
 
@@ -231,6 +241,129 @@ Approved by the user on 2026-09-06.
 - Link to the public deployment metadata using a relative site URL.
 - Validate locally, deploy to an Azure DEV preview, and publish only after PR
   review and `PROD` approval.
+
+## 12. Production Availability Monitoring
+
+Approved by the user on 2026-09-06 with a strict `$10` annual ceiling.
+
+- Monitor `https://jayaprakashkupparaju.com` from outside the application so a
+  hosting, DNS, TLS, or page-availability failure can be detected.
+- Use Application Insights backed by Log Analytics as the Azure Monitor data
+  destination for an availability test.
+- Add an actionable availability alert only after its threshold, evaluation
+  window, notification destination, and expected cost are reviewed.
+- Keep notification addresses and Azure account identifiers out of source
+  control; configure them out of band if an action group is approved.
+- Do not add browser-side telemetry in this step. Client telemetry and its
+  privacy implications will be evaluated separately.
+- Document the signal, alert behavior, verification steps, and response
+  procedure in `docs/monitoring.md` and a focused availability runbook.
+- Preserve the existing Static Web Apps deployment, custom domain, DNS, CI/CD,
+  and production approval controls.
+
+### Proposed Azure resources
+
+Create these resources in the existing `rg-personal-site-prod` resource group
+in Central US:
+
+| Resource | Proposed name | Purpose |
+|---|---|---|
+| Log Analytics workspace | `log-personal-site-prod` | Store and query availability results |
+| Application Insights | `appi-personal-site-prod` | Observability experience linked to the workspace |
+| Standard availability test | `webtest-personal-site-prod` | Exercise the public production URL from Azure test locations |
+| Azure Monitor action group | `ag-personal-site-prod` | Notify an out-of-band recipient; address is never committed |
+| Availability alert | `alert-personal-site-unavailable` | Detect customer-visible failures across multiple locations |
+| Automation account | `aa-personal-site-guard` | Run the independent test-disable safety control |
+| Automation runbook | `Disable-PersonalSiteWebTest` | Disable the billable test at the fixed cutoff |
+
+No managed identity, role assignment, browser SDK, connection string, or
+application change is required for this external test.
+
+### Proposed signal and alert
+
+- Create the Standard test in a disabled state. Enable it only for a supervised
+  two-hour learning exercise, using one location at 15-minute intervals.
+- Require HTTP 200, valid TLS, and the text `Production Website SRE Lab`.
+- Enable test retries to reduce transient network noise.
+- Enable proactive TLS certificate lifetime checking with a seven-day window.
+- Alert after repeated failure from the configured location. A single-location
+  test is less resilient to regional false positives but is required to stay
+  within the learning-project budget.
+- Notify through one email receiver configured directly in Azure. The address
+  will not be stored in Git, documentation, output, or deployment metadata.
+- Validate the action group separately, then verify availability results in
+  Application Insights and with a basic KQL query.
+- Before enabling the test, publish and validate a managed-identity Azure
+  Automation runbook with permission scoped only to this web-test resource.
+- Schedule the runbook for the fixed end of the two-hour exercise. It disables
+  the test and verifies that `Enabled` is false. Also disable the test directly
+  at the end of the supervised exercise; the runbook is the independent backup.
+
+### Cost and retention guardrails
+
+- Use Log Analytics pay-as-you-go with 30-day retention, no commitment tier,
+  and the lowest practical daily ingestion cap where supported.
+- Central US Standard web tests currently list at `$0.00056` USD per scheduled
+  execution in the Azure Retail Prices API. One location at 15-minute intervals
+  schedules approximately eight executions during two hours, estimated at less
+  than one cent before any retry executions.
+- Treat `$0.10` as the availability-test lab allowance to cover retries and
+  pricing variation. Confirm actual cost in Cost Analysis after usage appears.
+- Create a `$10` annual budget scoped to `rg-personal-site-prod`, with early
+  actual and forecast notifications beginning at 10% of the budget.
+- Do not leave the Standard test continuously enabled. At the end of the
+  exercise, require both a direct disable operation and a read-back showing the
+  resource is disabled; the scheduled runbook provides a second path.
+- Azure Automation includes the first 500 job-runtime minutes per subscription
+  each month. Confirm existing Automation usage before relying on that allowance;
+  this guard requires only one short run.
+- Azure budgets notify but do not stop consumption. The disable date and cost
+  controls are mandatory safety mechanisms, not optional reminders.
+- A pay-as-you-go subscription has no configurable hard dollar stop. Therefore,
+  no continuously billable monitor is permitted under this plan; meeting an
+  absolute `$10` ceiling takes precedence over continuous Azure monitoring.
+- The first 5 GB/month of Analytics Logs ingestion per billing account is
+  included under published Azure Monitor pricing; this small synthetic test is
+  expected to remain far below that volume.
+- Azure Monitor currently includes the first ten monitored metric time series
+  per month and the first 1,000 email notifications per month. Unexpected alert
+  volume will be treated as a configuration defect.
+
+### Execution and validation
+
+1. Confirm the existing subscription and Central US context out of band.
+2. Check for existing resources with the proposed names and verify provider,
+   quota, policy, and permissions without changing Azure.
+3. Create the workspace, workspace-based Application Insights resource, and
+   Standard availability test.
+4. Wait for successful synthetic results before enabling notification.
+5. Configure and test the action group out of band, then create the alert.
+6. Verify the alert is enabled and healthy without deliberately disrupting the
+   production website.
+7. Add `docs/monitoring.md` and `runbooks/website-unavailable.md`, update the
+   architecture and roadmap progress, and publish documentation through the
+   normal pull-request process.
+
+### Rollback
+
+If the test or alert is noisy, disable the alert and test first. Resource
+deletion is a separate destructive action and requires explicit approval. No
+rollback of the website, DNS, or deployment workflow is involved.
+
+### Live lab state
+
+- Annual resource-group budget: `$10` USD, with actual notifications at 10%,
+  50%, 80%, and 100%, plus a forecast notification at 10%.
+- Inactive monitoring foundation deployment: succeeded.
+- Cost-guard runbook: published and tested successfully while the web test was
+  disabled.
+- Managed identity role: `Monitoring Contributor` scoped to the individual web
+  test and verified in live Azure state.
+- Availability alert: deployed disabled, then enabled only for the supervised
+  exercise.
+- Standard web test: deployed disabled, then enabled only after the guard was
+  tested and scheduled.
+- Automatic cutoff: 2026-09-07T01:06:00Z.
 
 ## Functional Verification
 
