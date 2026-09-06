@@ -367,8 +367,8 @@ Production Deployment
 - [x] Create a GitHub `PROD` environment.
 - [x] Store deployment secrets securely.
 - [x] Add deployment approval for production.
-- [ ] Practice a rollback.
-- [ ] Document the rollback procedure.
+- [x] Practice a rollback.
+- [x] Document the rollback procedure.
 
 ## Documentation
 
