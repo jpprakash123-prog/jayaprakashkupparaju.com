@@ -20,6 +20,11 @@ retries the disable operation if the first job failed.
 An Azure budget is an alerting mechanism, not a spending cap. The test-disable
 control is what prevents unattended recurring test executions.
 
+The Action Group recipient is supplied through the secure `alertEmail` Bicep
+parameter at deployment time. The budget recipient is configured directly in
+Azure. The actual address must not be added to parameters files, documentation,
+workflow files, or Git history.
+
 ## Signal
 
 The Standard availability test requests the public production URL and checks:
