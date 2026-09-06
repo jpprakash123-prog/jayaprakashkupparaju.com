@@ -220,6 +220,65 @@
             color: #64748b;
         }
 
+        .featured-project {
+            grid-column: 1 / -1;
+            padding: 36px;
+            border-color: #bae6fd;
+            background: linear-gradient(135deg, #f8fafc 0%, #eff6ff 100%);
+        }
+
+        .project-kicker {
+            margin-bottom: 8px;
+            color: #0284c7;
+            font-size: 13px;
+            font-weight: 700;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+        }
+
+        .featured-project .project-summary {
+            max-width: 850px;
+            color: #475569;
+            font-size: 17px;
+        }
+
+        .project-details {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+            gap: 28px;
+            margin-top: 24px;
+        }
+
+        .project-details h4 {
+            margin-bottom: 10px;
+            color: #0f172a;
+        }
+
+        .project-details ul {
+            padding-left: 20px;
+            color: #64748b;
+        }
+
+        .project-details li {
+            margin-bottom: 8px;
+        }
+
+        .project-tools {
+            margin-top: 8px;
+        }
+
+        .project-link {
+            display: inline-block;
+            margin-top: 24px;
+            color: #0369a1;
+            font-weight: 700;
+            text-decoration: none;
+        }
+
+        .project-link:hover {
+            text-decoration: underline;
+        }
+
         .tag {
             display: inline-block;
             margin-top: 18px;
@@ -468,20 +527,58 @@
         </div>
 
 
-        <div class="card">
+        <article class="card featured-project">
 
-            <h3>This Website</h3>
+            <div class="project-kicker">Featured Project</div>
 
-            <p>
-                Building this website as a hands-on engineering lab for
-                CI/CD, Infrastructure as Code, observability, cloud and AI.
+            <h3>Production Website SRE Lab</h3>
+
+            <p class="project-summary">
+                Migrated this website from GitHub Pages to Azure Static Web Apps
+                and built a controlled delivery system around it. The project
+                turns a static portfolio into a practical lab for cloud
+                operations, deployment safety and incident recovery.
             </p>
 
-            <span class="tag">GitHub</span>
-            <span class="tag">CI/CD</span>
-            <span class="tag">Azure</span>
+            <div class="project-details">
 
-        </div>
+                <div>
+                    <h4>Engineering outcomes</h4>
+                    <ul>
+                        <li>Azure DEV previews for every pull request</li>
+                        <li>Protected production deployments with approval gates</li>
+                        <li>Live build provenance through deployment metadata</li>
+                        <li>Tested emergency rollback and source recovery process</li>
+                        <li>Custom domain, managed HTTPS and controlled DNS cutover</li>
+                    </ul>
+                </div>
+
+                <div>
+                    <h4>Skills demonstrated</h4>
+                    <ul>
+                        <li>CI/CD design, automated testing and security checks</li>
+                        <li>Environment-scoped secrets and branch protection</li>
+                        <li>Release verification, rollback and runbook development</li>
+                        <li>Azure operations, Cloudflare DNS and Git workflows</li>
+                    </ul>
+                </div>
+
+            </div>
+
+            <div class="project-tools" role="group" aria-label="Tools used">
+                <span class="tag">Azure Static Web Apps</span>
+                <span class="tag">GitHub Actions</span>
+                <span class="tag">Cloudflare DNS</span>
+                <span class="tag">Node.js</span>
+                <span class="tag">CI/CD</span>
+                <span class="tag">SRE</span>
+            </div>
+
+            <a class="project-link" href="/deployment-info.json">
+                View live deployment metadata &rarr;
+            </a>
+
+        </article>
 
     </div>
 
