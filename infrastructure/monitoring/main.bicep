@@ -6,6 +6,10 @@ param location string = resourceGroup().location
 @description('Public production URL checked by the disabled availability test.')
 param siteUrl string = 'https://jayaprakashkupparaju.com/'
 
+@secure()
+@description('Alert recipient configured at deployment time and never committed to source control.')
+param alertEmail string
+
 param workspaceName string = 'log-personal-site-prod'
 param applicationInsightsName string = 'appi-personal-site-prod'
 param webTestName string = 'webtest-personal-site-prod'
@@ -93,10 +97,10 @@ resource actionGroup 'Microsoft.Insights/actionGroups@2023-01-01' = {
   properties: {
     groupShortName: 'site-sre'
     enabled: true
-    armRoleReceivers: [
+    emailReceivers: [
       {
-        name: 'SubscriptionOwner'
-        roleId: '8e3af657-a8ff-443c-a75c-2fe8c4bcb635'
+        name: 'PrimarySreEmail'
+        emailAddress: alertEmail
         useCommonAlertSchema: true
       }
     ]
