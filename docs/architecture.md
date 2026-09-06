@@ -130,7 +130,7 @@ jayaprakashkupparaju.com
 Application Insights -> Log Analytics -> KQL
      |
      v
-Availability alert -> Owner-role notification
+Availability alert -> Action Group email notification
 
 Azure Automation managed identity
      |
