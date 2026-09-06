@@ -25,6 +25,8 @@ failure does not affect custom-domain traffic during the migration phase.
 
 - For a source or validation failure, fix the issue on a feature branch and
   create a new pull request.
+- For a successful but harmful production release requiring immediate
+  mitigation, follow [production-rollback.md](production-rollback.md).
 - For a transient GitHub or Azure failure, rerun the failed workflow once.
 - For an invalid deployment secret, rotate it in Azure and replace the
   encrypted GitHub secret without exposing its value.

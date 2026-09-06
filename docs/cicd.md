@@ -99,3 +99,8 @@ Azure subscription information.
 
 The `main` branch is protected and requires the `Validate static website`
 status check. Force pushes and branch deletion are blocked.
+
+## Operational Runbooks
+
+- [Deployment failure](../runbooks/deployment-failure.md)
+- [Azure production rollback](../runbooks/production-rollback.md)
