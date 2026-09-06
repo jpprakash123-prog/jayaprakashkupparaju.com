@@ -13,6 +13,10 @@ test is therefore disabled by default and may be enabled only during a supervise
 two-hour exercise. It must be disabled directly afterward, with an independent
 Azure Automation runbook scheduled as a backup.
 
+Two one-time schedules invoke the idempotent runbook 15 minutes apart. The
+second invocation verifies the disabled state after a successful first run or
+retries the disable operation if the first job failed.
+
 An Azure budget is an alerting mechanism, not a spending cap. The test-disable
 control is what prevents unattended recurring test executions.
 
