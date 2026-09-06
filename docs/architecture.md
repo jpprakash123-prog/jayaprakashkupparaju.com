@@ -2,355 +2,180 @@
 
 ## Overview
 
-The personal website is currently a static website hosted using GitHub Pages.
+The personal website is a static site hosted in production by Azure Static Web
+Apps. GitHub remains the source repository and GitHub Actions provides CI,
+pull-request previews, approval-gated production deployment, version metadata,
+and emergency rollback.
 
-This document records the current baseline architecture before the website is migrated to Azure and expanded into a hands-on SRE learning environment.
+Cloudflare manages public DNS. Both the apex domain and `www` hostname route to
+Azure. The previous GitHub Pages configuration remains temporarily available as
+a rollback target during the post-cutover observation period.
 
----
-
-## Current Architecture
+## Production Request Flow
 
 ```text
-User Browser
+User browser
      |
      | HTTPS
      v
-jayaprakashkupparaju.com
+jayaprakashkupparaju.com or www.jayaprakashkupparaju.com
      |
-     | DNS Resolution
+     | DNS resolution
      v
 Cloudflare DNS
      |
-     | A / CNAME Records
+     | apex CNAME flattening / www CNAME
      v
-GitHub Pages
+Azure Static Web Apps
      |
      v
-GitHub Repository
-<GITHUB_OWNER>/jayaprakashkupparaju.com
-     |
-     v
-index.html + static assets
+index.html + profile.jpg + deployment-info.json
 ```
 
-### Request Flow
-
-1. A visitor enters `https://jayaprakashkupparaju.com`.
-2. DNS for the domain is managed by Cloudflare.
-3. Cloudflare DNS resolves the domain to GitHub Pages.
-4. The browser connects to GitHub Pages.
-5. GitHub identifies the configured custom domain.
-6. GitHub Pages serves the static website from the repository.
-
----
+1. A visitor requests either the apex or `www` HTTPS URL.
+2. Cloudflare resolves the hostname to the Azure Static Web Apps hostname.
+3. Azure terminates HTTPS using its managed certificate for the custom domain.
+4. Azure serves the static production deployment.
+5. `/deployment-info.json` identifies the exact content commit and deployment
+   that is currently live.
 
 ## Domain and DNS
 
-**Domain**
+| Area                 | Current state                                          |
+| -------------------- | ------------------------------------------------------ |
+| Domain               | `jayaprakashkupparaju.com`                             |
+| DNS provider         | Cloudflare DNS                                         |
+| Apex routing         | CNAME flattening to the Azure Static Web Apps hostname |
+| `www` routing        | CNAME to the Azure Static Web Apps hostname            |
+| Proxy mode           | DNS only during the initial Azure production period    |
+| Ownership validation | `_dnsauth` TXT records for apex and `www`              |
+| HTTPS                | Azure Static Web Apps managed certificates             |
 
-`jayaprakashkupparaju.com`
+The TXT records prove domain ownership and do not route visitor traffic. Their
+token values are operational DNS data and are not stored in this repository.
 
-**DNS Provider**
-
-Cloudflare
-
-### Root Domain Records
-
-The root domain currently points to the GitHub Pages IPv4 addresses:
-
-```text
-185.199.108.153
-185.199.109.153
-185.199.110.153
-185.199.111.153
-```
-
-### WWW Record
+## Delivery Flow
 
 ```text
-Type:   CNAME
-Name:   www
-Target: <GITHUB_OWNER>.github.io
-```
-
-These records allow the custom domain to resolve to the GitHub Pages hosting infrastructure.
-
----
-
-## Source Repository
-
-**Repository**
-
-```text
-<GITHUB_OWNER>/jayaprakashkupparaju.com
-```
-
-The repository currently contains the static website source code and assets.
-
-Example:
-
-```text
-jayaprakashkupparaju.com/
-|
-├── index.html
-├── profile.jpg
-├── README.md
-├── SRE_LEARNING_ROADMAP.md
-└── docs/
-    └── architecture.md
-```
-
----
-
-## Hosting
-
-**Current hosting platform:** GitHub Pages
-
-**Production URL:**
-
-`https://jayaprakashkupparaju.com`
-
-GitHub Pages serves the static HTML and related assets from the GitHub repository.
-
----
-
-## Current Deployment Model
-
-The current deployment process is intentionally simple.
-
-```text
-Edit Website
+Feature branch
      |
      v
-Commit to GitHub
+Pull request
      |
-     v
-GitHub Repository
+     +-- CI validation
      |
-     v
-GitHub Pages Deployment
-     |
-     v
-Production Website
+     `-- DEV environment -> temporary Azure preview
+                              |
+                              v
+                         review and merge
+                              |
+                              v
+                            main
+                              |
+                              v
+                     PROD approval gate
+                              |
+                              v
+                  Azure production deployment
 ```
 
-At this stage:
+The repository uses these controls:
 
-- The website is static.
-- Source code is stored in GitHub.
-- GitHub Pages hosts the website.
-- DNS is managed through Cloudflare.
-- There is no custom CI/CD pipeline yet.
-- Infrastructure is not yet managed through Infrastructure as Code.
-- Application observability has not yet been implemented.
-- SLOs and error budgets have not yet been defined.
+- `main` is protected and requires the website validation status check.
+- Pull requests deploy temporary Azure previews through GitHub `DEV`.
+- Merges to `main` start a deployment through GitHub `PROD`.
+- A reviewer must approve the `PROD` deployment before its secret is released.
+- `DEV` and `PROD` have separate encrypted environment-scoped deployment
+  secrets.
+- Normal and emergency production deployments share a concurrency group so they
+  cannot update production simultaneously.
 
-This represents the baseline against which future SRE improvements will be measured.
+## Deployment Contents
 
----
+The build places only public website assets in `dist/`:
+
+```text
+dist/
+|-- index.html
+|-- profile.jpg
+`-- deployment-info.json
+```
+
+`deployment-info.json` is generated for each Azure deployment and contains:
+
+- the actual website content commit;
+- deployment type (`preview`, `production`, or `rollback`);
+- GitHub workflow run ID;
+- ISO UTC deployment time;
+- a human-readable Central Time value with weekday.
+
+It contains no credentials, user identities, account identifiers, or Azure
+subscription information.
+
+## Emergency Recovery
+
+The manual emergency workflow can redeploy an exact known-good commit already
+contained in `main`. It validates the candidate before requesting `PROD`
+approval and publishes rollback-specific version metadata.
+
+An emergency deployment is temporary mitigation. A normal source-revert pull
+request must follow so that `main` and production return to the same state. See
+[production-rollback.md](../runbooks/production-rollback.md).
+
+## GitHub Pages Fallback
+
+GitHub Pages no longer receives public-domain traffic. During the observation
+period, its repository configuration remains available as a rollback option.
+
+The recorded GitHub Pages DNS rollback values are:
+
+```text
+A @ -> 185.199.108.153
+A @ -> 185.199.109.153
+A @ -> 185.199.110.153
+A @ -> 185.199.111.153
+CNAME www -> <GITHUB_OWNER>.github.io
+```
+
+If Azure fails during the observation period, restore these routing records in
+Cloudflare. Do not remove unrelated TXT, MX, or email records.
+
+After Azure has remained stable for the agreed observation period, the obsolete
+GitHub Pages custom-domain configuration can be removed through a separate,
+reviewed change.
 
 ## Current Technology Stack
 
-| Area | Current Technology |
-|---|---|
-| Domain | jayaprakashkupparaju.com |
-| Domain Registrar | Cloudflare Registrar |
-| DNS | Cloudflare DNS |
-| Source Control | GitHub |
-| Hosting | GitHub Pages |
-| Frontend | HTML / CSS |
-| CI/CD | GitHub Pages built-in deployment |
-| Infrastructure as Code | Not implemented |
-| Monitoring | Not implemented |
-| Observability | Not implemented |
-| Containers | Not implemented |
-| Kubernetes | Not implemented |
-| SRE Agent | Not implemented |
+| Area                         | Current technology                                  |
+| ---------------------------- | --------------------------------------------------- |
+| Domain and DNS               | Cloudflare                                          |
+| Source control               | GitHub                                              |
+| Hosting                      | Azure Static Web Apps                               |
+| Frontend                     | Static HTML and CSS                                 |
+| CI/CD                        | GitHub Actions                                      |
+| Deployment controls          | GitHub `DEV` and approval-gated `PROD` environments |
+| Build provenance             | Public `deployment-info.json`                       |
+| Recovery                     | Emergency rollback workflow and documented runbook  |
+| Infrastructure as Code       | Not implemented                                     |
+| Monitoring and observability | Not implemented                                     |
+| Containers and Kubernetes    | Not implemented                                     |
 
----
+## Architecture Status
 
-## Target — Phase 1
+- [x] Static website deployed to Azure Static Web Apps.
+- [x] Azure-generated HTTPS endpoint validated.
+- [x] Apex and `www` custom domains validated in Azure.
+- [x] Cloudflare DNS cut over from GitHub Pages to Azure.
+- [x] HTTPS, website content, assets, and deployment metadata verified.
+- [x] CI, preview, production approval, version tracking, and rollback tested.
+- [ ] Complete the post-cutover observation period.
+- [ ] Remove obsolete GitHub Pages custom-domain configuration.
+- [ ] Manage Azure infrastructure through Terraform.
+- [ ] Implement monitoring, observability, SLOs, and error budgets.
 
-The next phase will move the hosting layer from GitHub Pages to Azure Static Web Apps.
+## Next Architecture Stage
 
-GitHub will continue to be used as the source-code repository.
-
-```text
-Developer
-     |
-     | git push / Pull Request
-     v
-GitHub
-     |
-     | Deployment Workflow
-     v
-GitHub Actions
-     |
-     v
-Azure Static Web Apps
-     ^
-     |
-Cloudflare DNS
-     ^
-     |
-jayaprakashkupparaju.com
-     ^
-     |
-User Browser
-```
-
-The migration should be performed without removing the existing GitHub Pages site until the Azure-hosted version has been tested successfully.
-
----
-
-## Long-Term SRE Lab Direction
-
-The architecture will evolve gradually as new SRE skills are introduced.
-
-```text
-GitHub
-   |
-   +-- Application Code
-   +-- Terraform
-   +-- Kubernetes Manifests
-   +-- Runbooks
-   +-- SLO Definitions
-   +-- Incident Records
-   +-- SRE Agent Skills
-   |
-   v
-CI/CD
-   |
-   v
-Azure
-   |
-   +-- Static Web Apps
-   +-- Application/API
-   +-- Container Registry
-   +-- AKS
-   +-- Application Insights
-   +-- Log Analytics
-   +-- Azure Monitor
-   +-- Managed Identity
-   +-- Azure SRE Agent
-   |
-   v
-Reliability Engineering
-   |
-   +-- Metrics
-   +-- Logs
-   +-- Traces
-   +-- SLI/SLO
-   +-- Error Budgets
-   +-- Alerting
-   +-- Runbooks
-   +-- Incident Response
-   +-- Postmortems
-   +-- Chaos Testing
-   +-- Automation
-```
-
----
-
-## Architecture Evolution
-
-The project should evolve in this order:
-
-```text
-GitHub Pages
-     |
-     v
-Azure Static Web Apps
-     |
-     v
-CI/CD
-     |
-     v
-Terraform
-     |
-     v
-Azure Monitor + Application Insights
-     |
-     v
-SLI / SLO / Error Budgets
-     |
-     v
-Backend API
-     |
-     v
-Docker
-     |
-     v
-Azure Container Apps
-     |
-     v
-Kubernetes
-     |
-     v
-AKS
-     |
-     v
-OpenTelemetry / Prometheus / Grafana
-     |
-     v
-Incident Management + Runbooks
-     |
-     v
-Azure SRE Agent
-     |
-     v
-Chaos Engineering
-     |
-     v
-GitOps
-```
-
----
-
-## Baseline Status
-
-- [x] Custom domain purchased.
-- [x] Static website created.
-- [x] GitHub repository created.
-- [x] GitHub Pages configured.
-- [x] Cloudflare DNS configured for GitHub Pages.
-- [x] Custom domain connected to GitHub Pages.
-- [x] Current architecture documented.
-- [ ] Deploy website to Azure Static Web Apps.
-- [ ] Implement custom CI/CD.
-- [ ] Implement Infrastructure as Code.
-- [ ] Implement observability.
-- [ ] Define SLOs and error budgets.
-
----
-
-## Current Phase 1 Parallel Deployment
-
-The static website is now deployed to Azure Static Web Apps and validated at
-its Azure-provided HTTPS endpoint. GitHub Actions deploys only `index.html` and
-`profile.jpg` from the repository.
-
-```text
-GitHub repository
-   |-- GitHub Pages (current custom-domain host)
-   |
-   `-- GitHub Actions
-          |
-          v
-      Azure Static Web Apps
-          |
-          v
-      azurestaticapps.net HTTPS endpoint
-```
-
-The Cloudflare DNS records and repository `CNAME` remain unchanged. Therefore,
-the custom domain continues to use GitHub Pages while the Azure deployment is
-available for parallel validation.
-
----
-
-## Next Step
-
-Proceed to **Phase 1 — Azure Static Web Apps**.
-
-The immediate objective is to deploy the existing static website to Azure while keeping the current GitHub Pages deployment operational until the Azure deployment has been fully validated.
+The next major stage is Infrastructure as Code. The existing Azure resources and
+configuration will be represented in Terraform so the environment can be
+reviewed, reproduced, and changed through source control rather than manual
+operations.
