@@ -353,11 +353,11 @@ The roadmap covers the project from the initial static website through advanced 
 - [x] Configure GitHub Pages
 - [x] Configure Cloudflare DNS
 - [x] Document baseline architecture
-- [ ] Deploy to Azure Static Web Apps
-- [ ] Implement GitHub Actions CI/CD
+- [x] Deploy to Azure Static Web Apps
+- [x] Implement GitHub Actions CI/CD
 - [ ] Implement Terraform
-- [ ] Add Azure observability
-- [ ] Define SLIs, SLOs, and error budgets
+- [x] Add a cost-controlled Azure observability lab
+- [x] Define initial laboratory SLIs, SLOs, and error budgets
 - [ ] Build backend API
 - [ ] Containerize API with Docker
 - [ ] Deploy to Azure Container Apps
@@ -388,6 +388,12 @@ Azure deployment documentation:
 
 [`docs/deployment.md`](docs/deployment.md)
 
+Monitoring and reliability objectives:
+
+- [`docs/monitoring.md`](docs/monitoring.md)
+- [`docs/slo.md`](docs/slo.md)
+- [`docs/error-budget-policy.md`](docs/error-budget-policy.md)
+
 Repository security and sensitive-information policy:
 
 [`SECURITY.md`](SECURITY.md)
@@ -412,13 +418,13 @@ docs/
 
 ## Reliability Goals
 
-Once observability is implemented, initial laboratory SLOs will include:
+The initial laboratory SLOs are defined in [`docs/slo.md`](docs/slo.md):
 
 | SLI | Initial Target |
 |---|---:|
 | Availability | 99.9% |
 | Request latency | 95% under 500 ms |
-| HTTP 5xx error rate | Less than 1% |
+| Synthetic check error rate | Less than 1% |
 
 These targets will be refined based on actual telemetry and architecture.
 
@@ -444,31 +450,31 @@ The project follows several operating principles:
 
 ## Current Milestone
 
-### Phase 1 — Azure Static Web Apps
+### Phase 5 — SLIs, SLOs and Error Budgets
 
-The next milestone is to deploy the existing static website to Azure Static Web Apps while continuing to use GitHub as the source repository.
+The current milestone turns captured availability telemetry into explicit
+reliability objectives and an operational decision policy. Continuous 30-day
+compliance is not claimed while the paid availability test remains disabled.
 
-The existing GitHub Pages site will remain operational until the Azure-hosted version is validated.
-
-Target flow:
+Reliability flow:
 
 ```text
-Developer
+Time-boxed availability test
      |
      v
-GitHub
+Application Insights
      |
      v
-GitHub Actions
+Log Analytics + KQL
      |
      v
-Azure Static Web Apps
+SLI measurement
      |
      v
-Cloudflare DNS
+SLO evaluation
      |
      v
-jayaprakashkupparaju.com
+Error-budget release decision
 ```
 
 ---

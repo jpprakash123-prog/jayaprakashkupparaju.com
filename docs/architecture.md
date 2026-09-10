@@ -202,7 +202,8 @@ reviewed change.
 - [ ] Remove obsolete GitHub Pages custom-domain configuration.
 - [ ] Manage Azure infrastructure through Terraform.
 - [x] Add a cost-controlled Azure availability monitoring lab.
-- [ ] Define production SLIs, SLOs, and error budgets.
+- [x] Define initial laboratory SLIs, SLOs, and an error-budget policy.
+- [ ] Collect enough continuous data to evaluate a production 30-day SLO.
 
 ## Next Architecture Stage
 

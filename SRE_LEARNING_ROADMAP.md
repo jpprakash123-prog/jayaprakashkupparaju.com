@@ -578,14 +578,14 @@ Approximately 43 minutes per 30-day month.
 
 ## Tasks
 
-- [ ] Define availability SLI.
-- [ ] Define latency SLI.
-- [ ] Define error-rate SLI.
-- [ ] Define 30-day SLOs.
-- [ ] Calculate the error budget.
+- [x] Define availability SLI.
+- [x] Define latency SLI.
+- [x] Define error-rate SLI.
+- [x] Define 30-day SLOs.
+- [x] Calculate the error budget.
 - [ ] Build an SLO dashboard.
 - [ ] Track remaining error budget.
-- [ ] Document what happens when the error budget is exhausted.
+- [x] Document what happens when the error budget is exhausted.
 - [ ] Review SLOs monthly.
 
 ## Documentation
