@@ -1,0 +1,127 @@
+{
+  "$schema": "https://github.com/Microsoft/Application-Insights-Workbooks/blob/master/schema/workbook.json",
+  "version": "Notebook/1.0",
+  "items": [
+    {
+      "type": 1,
+      "content": {
+        "json": "# Production Website — SLO Dashboard\n\nThis laboratory dashboard evaluates the last 30 days of **observed** availability-test results. The paid test is disabled outside supervised exercises. Missing observations are **unknown**, not successful. See `docs/slo.md` and `docs/error-budget-policy.md` in the project repository for definitions and operating policy."
+      },
+      "name": "overview"
+    },
+    {
+      "type": 3,
+      "content": {
+        "version": "KqlItem/1.0",
+        "query": "let EvaluationWindow = 30d;\nAppAvailabilityResults\n| where TimeGenerated >= ago(EvaluationWindow)\n| summarize TotalChecks=count(), FirstCheck=min(TimeGenerated), LastCheck=max(TimeGenerated)\n| extend CoverageStatus=iff(TotalChecks == 0, 'UNKNOWN — no observations', strcat(TotalChecks, ' checks observed'))\n| project CoverageStatus, TotalChecks, FirstCheck, LastCheck",
+        "size": 0,
+        "title": "Measurement coverage",
+        "timeContext": {
+          "durationMs": 2592000000
+        },
+        "queryType": 0,
+        "resourceType": "microsoft.operationalinsights/workspaces",
+        "crossComponentResources": [
+          "__WORKSPACE_RESOURCE_ID__"
+        ],
+        "visualization": "table"
+      },
+      "name": "measurement-coverage"
+    },
+    {
+      "type": 1,
+      "content": {
+        "json": "## Current indicators\n\nTargets: **99.9% availability**, **95% of successful checks under 500 ms**, and **less than 1% synthetic errors**. Results are laboratory evidence only until continuous coverage is approved."
+      },
+      "name": "indicator-heading"
+    },
+    {
+      "type": 3,
+      "content": {
+        "version": "KqlItem/1.0",
+        "query": "let EvaluationWindow = 30d;\nlet AvailabilityObjective = 99.9;\nlet LatencyObjective = 95.0;\nlet ErrorRateObjective = 1.0;\nlet LatencyTargetMs = 500.0;\nlet Results = AppAvailabilityResults\n| where TimeGenerated >= ago(EvaluationWindow)\n| summarize TotalChecks=count(), SuccessfulChecks=countif(Success == true), FailedChecks=countif(Success == false), FastChecks=countif(Success == true and DurationMs < LatencyTargetMs);\nResults\n| extend AvailabilityPercent=iff(TotalChecks == 0, real(null), 100.0 * SuccessfulChecks / TotalChecks), LatencyCompliancePercent=iff(SuccessfulChecks == 0, real(null), 100.0 * FastChecks / SuccessfulChecks), SyntheticErrorRatePercent=iff(TotalChecks == 0, real(null), 100.0 * FailedChecks / TotalChecks)\n| project Metric=pack_array('Availability', 'Latency compliance', 'Synthetic error rate'), Actual=pack_array(AvailabilityPercent, LatencyCompliancePercent, SyntheticErrorRatePercent), Target=pack_array(AvailabilityObjective, LatencyObjective, ErrorRateObjective), HigherIsBetter=pack_array(true, true, false)\n| mv-expand Metric to typeof(string), Actual to typeof(real), Target to typeof(real), HigherIsBetter to typeof(bool)\n| extend Status=case(isnull(Actual), 'UNKNOWN', HigherIsBetter and Actual >= Target, 'MET', not(HigherIsBetter) and Actual < Target, 'MET', 'NOT MET')\n| project Metric, ActualPercent=round(Actual, 3), TargetPercent=Target, Status",
+        "size": 0,
+        "title": "SLO evaluation",
+        "timeContext": {
+          "durationMs": 2592000000
+        },
+        "queryType": 0,
+        "resourceType": "microsoft.operationalinsights/workspaces",
+        "crossComponentResources": [
+          "__WORKSPACE_RESOURCE_ID__"
+        ],
+        "visualization": "table"
+      },
+      "name": "slo-evaluation"
+    },
+    {
+      "type": 3,
+      "content": {
+        "version": "KqlItem/1.0",
+        "query": "let EvaluationWindow = 30d;\nAppAvailabilityResults\n| where TimeGenerated >= ago(EvaluationWindow)\n| summarize P50=round(percentile(DurationMs, 50), 2), P95=round(percentile(DurationMs, 95), 2), P99=round(percentile(DurationMs, 99), 2), Average=round(avg(DurationMs), 2)\n| project P50DurationMs=P50, P95DurationMs=P95, P99DurationMs=P99, AverageDurationMs=Average",
+        "size": 0,
+        "title": "Latency percentiles",
+        "timeContext": {
+          "durationMs": 2592000000
+        },
+        "queryType": 0,
+        "resourceType": "microsoft.operationalinsights/workspaces",
+        "crossComponentResources": [
+          "__WORKSPACE_RESOURCE_ID__"
+        ],
+        "visualization": "table"
+      },
+      "customWidth": "50",
+      "name": "latency-percentiles"
+    },
+    {
+      "type": 3,
+      "content": {
+        "version": "KqlItem/1.0",
+        "query": "let EvaluationWindow = 30d;\nlet AvailabilityObjective = 0.999;\nAppAvailabilityResults\n| where TimeGenerated >= ago(EvaluationWindow)\n| summarize TotalChecks=count(), FailedChecks=countif(Success == false)\n| extend AllowedFailedChecks=TotalChecks * (1.0 - AvailabilityObjective)\n| extend RemainingFailedChecks=AllowedFailedChecks - FailedChecks\n| extend RemainingBudgetPercent=iff(TotalChecks == 0, real(null), round(100.0 * RemainingFailedChecks / AllowedFailedChecks, 2))\n| extend Status=case(TotalChecks == 0, 'UNKNOWN', RemainingBudgetPercent <= 0, 'EXHAUSTED', RemainingBudgetPercent <= 25, 'AT RISK', RemainingBudgetPercent <= 50, 'CAUTION', 'NORMAL')\n| project TotalChecks, FailedChecks, AllowedFailedChecks=round(AllowedFailedChecks, 3), RemainingFailedChecks=round(RemainingFailedChecks, 3), RemainingBudgetPercent, Status",
+        "size": 0,
+        "title": "Availability error budget",
+        "timeContext": {
+          "durationMs": 2592000000
+        },
+        "queryType": 0,
+        "resourceType": "microsoft.operationalinsights/workspaces",
+        "crossComponentResources": [
+          "__WORKSPACE_RESOURCE_ID__"
+        ],
+        "visualization": "table"
+      },
+      "customWidth": "50",
+      "name": "error-budget"
+    },
+    {
+      "type": 3,
+      "content": {
+        "version": "KqlItem/1.0",
+        "query": "let EvaluationWindow = 30d;\nAppAvailabilityResults\n| where TimeGenerated >= ago(EvaluationWindow)\n| summarize AvailabilityPercent=100.0 * countif(Success == true) / count(), AverageDurationMs=avg(DurationMs), Checks=count() by bin(TimeGenerated, 1d)\n| order by TimeGenerated asc",
+        "size": 0,
+        "title": "Observed daily availability",
+        "timeContext": {
+          "durationMs": 2592000000
+        },
+        "queryType": 0,
+        "resourceType": "microsoft.operationalinsights/workspaces",
+        "crossComponentResources": [
+          "__WORKSPACE_RESOURCE_ID__"
+        ],
+        "visualization": "timechart"
+      },
+      "name": "daily-availability"
+    },
+    {
+      "type": 1,
+      "content": {
+        "json": "## How to use this dashboard\n\n1. Check **Measurement coverage** before interpreting any percentage.\n2. Investigate any **NOT MET** or **EXHAUSTED** status using the availability runbook.\n3. Do not treat a period without observations as healthy.\n4. Keep the Standard availability test disabled outside an approved, supervised exercise."
+      },
+      "name": "operator-guidance"
+    }
+  ],
+  "fallbackResourceIds": [
+    "__WORKSPACE_RESOURCE_ID__"
+  ]
+}

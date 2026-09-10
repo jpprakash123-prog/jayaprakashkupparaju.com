@@ -144,3 +144,14 @@ allowance upward.
   availability begins consuming the allowed budget.
 - Do not build a continuously refreshing paid dashboard until its annual cost
   fits within the approved project budget.
+
+## SLO dashboard
+
+The source-controlled Azure Workbook is defined by:
+
+- `infrastructure/monitoring/slo-workbook.bicep`;
+- `infrastructure/monitoring/slo-workbook.json`.
+
+It queries the existing Analytics table only when opened. It does not enable
+the availability test, ingest telemetry, schedule queries, or change alerting.
+Always inspect its measurement-coverage result before interpreting an SLO.

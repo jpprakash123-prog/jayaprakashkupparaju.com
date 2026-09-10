@@ -2,10 +2,10 @@
 
 ## Status
 
-Validated — the approved Azure observability lab passed Bicep compilation,
-Azure template validation, what-if review, CI, security, cost, policy, provider,
-and static RBAC checks. Deployment must create the budget before the inactive
-monitoring foundation and must not enable the web test.
+Deployed — the approved SLO Workbook passed KQL schema checks, Bicep
+compilation, Azure template validation, what-if review, CI, security, cost,
+policy, provider, and static RBAC checks, then deployed successfully. The paid
+availability test remains disabled.
 
 ## Objective
 
@@ -143,6 +143,16 @@ Azure Static Web Apps uses an app-count subscription limit rather than a vCPU-st
 | Monitoring runbook syntax | PowerShell AST parser | Pass | 2026-09-06 |
 | Monitoring CI and security | `npm run ci` with command-scoped Git safe directory | Pass — seven tests, sensitive-data scan, and build | 2026-09-06 |
 | Monitoring RBAC | Static Bicep and runbook review | Pass — system identity receives Monitoring Contributor only at the web-test resource scope | 2026-09-06 |
+| SLO Workbook KQL | Five queries executed against the existing `AppAvailabilityResults` schema | Pass — coverage, SLO evaluation, percentiles, error budget, and daily trend returned valid results | 2026-09-10 |
+| SLO Workbook Bicep compilation | `az bicep build --file infrastructure/monitoring/slo-workbook.bicep` | Pass | 2026-09-10 |
+| SLO Workbook template validation | `Test-AzResourceGroupDeployment` using the compiled template | Pass — no validation errors | 2026-09-10 |
+| SLO Workbook what-if | `Get-AzResourceGroupDeploymentWhatIfResult` with `ResourceIdOnly` | Pass — one create, zero modifies, zero deletes; existing resources ignored | 2026-09-10 |
+| SLO Workbook monitoring safety | Read-back of `webtest-personal-site-prod` | Pass — availability test remains disabled | 2026-09-10 |
+| SLO Workbook current cost | Cost Management `ActualCost`, month-to-date, scoped to `rg-personal-site-prod` | Pass — `$0.00` before deployment | 2026-09-10 |
+| SLO Workbook providers and policy | Provider registration and subscription policy review | Pass — required providers registered; three assignments reviewed; template validation found no denial | 2026-09-10 |
+| SLO Workbook CI and security | `npm run ci` with command-scoped Git safe directory | Pass — HTML validation, 15 tests, sensitive-data scan, and build | 2026-09-10 |
+| SLO Workbook source hygiene | `git diff --cached --check` | Pass after removing one trailing blank line | 2026-09-10 |
+| SLO Workbook RBAC | Static Bicep review | Pass — no identity or role assignment is created; viewers use existing Entra ID and Azure RBAC | 2026-09-10 |
 
 Validated by: Azure validation workflow.
 
@@ -367,6 +377,127 @@ rollback of the website, DNS, or deployment workflow is involved.
 - Independent retry cutoff: 2026-09-07T01:21:00Z. Because the runbook is
   idempotent, this confirms the disabled state if the primary job succeeded and
   retries the disable operation if it did not.
+
+## 13. SLO Dashboard
+
+Status: Deployed — Azure deployment and post-deployment verification passed on
+2026-09-10. The Workbook is available in Azure Portal, and the availability
+test remains disabled.
+
+### Objective
+
+Create a source-controlled Azure dashboard for the laboratory availability,
+latency, synthetic error-rate, and error-budget indicators defined in
+`docs/slo.md`.
+
+### Planning constraints
+
+- Reuse the existing Log Analytics workspace and captured telemetry.
+- Keep the paid availability test disabled.
+- Add no telemetry ingestion, scheduled queries, alerts, or recurring compute.
+- Confirm the dashboard resource and query-viewing cost before implementation.
+- Store no recipient addresses, account identifiers, or credentials in Git.
+- Treat periods without telemetry as unknown rather than healthy.
+
+### Selected design
+
+- Create one shared Azure Workbook with display name
+  `workbook-personal-site-slo` in the existing production resource group and
+  Central US region. Use a deterministic GUID for its required resource name.
+- Define it in a separate `infrastructure/monitoring/slo-workbook.bicep` file
+  using `Microsoft.Insights/workbooks@2023-06-01`.
+- Reference the existing Log Analytics workspace by name. Do not redeploy or
+  modify the monitoring foundation.
+- Use `AppAvailabilityResults` with a 30-day time filter.
+- Display data coverage, total checks, availability, latency compliance,
+  synthetic error rate, remaining error budget, latency percentiles, and a
+  daily trend.
+- Display an explicit unknown/no-data state when the selected period contains
+  no checks.
+- Run queries only when a user opens the workbook; create no scheduled-query
+  rule or background refresh service.
+
+### Cost
+
+- Expected incremental resource cost: `$0`. Azure Workbooks provide the
+  visualization layer without a separately listed Workbook meter.
+- The workbook queries the existing Analytics table only when opened. It does
+  not ingest data or enable the Standard availability test.
+- Existing Log Analytics ingestion and retention pricing still applies, but
+  this change creates no additional telemetry.
+- Validate actual resource-group cost before deployment and through the
+  existing budget and weekly cost report afterward.
+
+### Security and access
+
+- The workbook has no managed identity, secrets, email recipient, or public
+  endpoint.
+- Azure Portal users view it using their own Entra identity and Azure RBAC.
+- Viewing log results requires workbook read permission plus Log Analytics
+  query/data read permission; do not add a new role assignment for the current
+  owner.
+- Use the workspace resource ID dynamically and store no subscription or tenant
+  identifier in source control.
+
+### Azure context
+
+- Reuse the previously approved Azure subscription; its identifier remains out
+  of source control and documentation.
+- Resource group: `rg-personal-site-prod`.
+- Region: Central US.
+
+### Research and capacity result
+
+- Azure Workbooks support Log Analytics Analytics-table queries and KQL-based
+  tiles, grids, and charts.
+- `Microsoft.Insights/workbooks@2023-06-01` supports resource-group deployment.
+- No Workbook currently exists in Central US in this subscription.
+- The Microsoft Quota CLI check could not authenticate with its separate stale
+  CLI session. Workbooks do not reserve regional compute capacity; template
+  validation and what-if will provide the deployment preflight instead.
+- Existing user RBAC already permits workspace queries. No new role assignment
+  is planned.
+
+### Validation
+
+1. Validate every KQL query against the existing workspace schema.
+2. Compile the standalone Bicep file.
+3. Run Azure template validation.
+4. Run what-if and require exactly one Workbook create with no changes or
+   deletes to existing monitoring or website resources.
+5. Run repository CI and the sensitive-data scan.
+6. Query actual month-to-date resource-group cost before deployment.
+7. After deployment, open the workbook and confirm the historical ten-check
+   sample renders without enabling the availability test.
+8. Confirm the web test remains disabled and record the deployment result.
+
+### Deployment and recovery
+
+- Deploy the standalone workbook template at resource-group scope only after
+  validation and a second explicit deployment approval.
+- A display or query defect affects only the dashboard. Correct and redeploy
+  the workbook; it cannot affect website traffic or monitoring execution.
+- If removal is later required, delete only the exact Workbook resource after
+  separate destructive-action approval. Leaving an unused workbook in place
+  does not create scheduled execution or telemetry ingestion.
+
+### Deployment result
+
+- Resource: one shared Azure Workbook named `workbook-personal-site-slo`.
+- Location: Central US.
+- Deployment: `slo-workbook-20260910-172815`, succeeded.
+- Existing-resource impact: none; validation and what-if reported zero modifies
+  and zero deletes.
+- Monitoring safety: `webtest-personal-site-prod` read back as disabled after
+  deployment.
+- RBAC: no identity or role assignment was created.
+
+### Generated artifacts
+
+- `infrastructure/monitoring/slo-workbook.bicep`
+- `infrastructure/monitoring/slo-workbook.json`
+- `tests/slo-workbook.test.mjs`
+- SLO documentation updated with dashboard behavior and limitations.
 
 ## Functional Verification
 
