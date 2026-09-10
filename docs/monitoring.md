@@ -75,3 +75,7 @@ is false. Then verify the scheduled runbook also completes successfully.
 
 Follow the [website availability failure runbook](../runbooks/availability-failure.md)
 when the test or alert indicates a customer-visible failure.
+
+Use the [website SLI and SLO definitions](slo.md) to calculate reliability and
+the [error-budget policy](error-budget-policy.md) to decide when reliability
+work must take priority over feature delivery.
