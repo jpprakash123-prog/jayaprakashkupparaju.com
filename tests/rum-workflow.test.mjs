@@ -25,6 +25,22 @@ test("RUM configuration is limited to the protected production job", () => {
     /secrets\.APPLICATIONINSIGHTS_CONNECTION_STRING/,
   );
   assert.match(productionSection, /date -u -d '\+2 hours'/);
+  assert.match(deploymentWorkflow, /enable_rum:/);
+  assert.match(deploymentWorkflow, /default: false/);
+  assert.equal(
+    productionSection.match(
+      /if: github\.event_name == 'workflow_dispatch' && inputs\.enable_rum/g,
+    )?.length,
+    2,
+  );
+});
+
+test("normal main deployments keep RUM disabled", () => {
+  assert.match(deploymentWorkflow, /push:\s*\n\s*branches:\s*\n\s*- main/);
+  assert.doesNotMatch(
+    deploymentWorkflow,
+    /if: github\.event_name == 'push' && inputs\.enable_rum/,
+  );
 });
 
 test("emergency rollback keeps browser telemetry disabled", () => {

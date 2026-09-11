@@ -22,8 +22,10 @@ privacy and security change.
 - Local and pull-request builds produce `rum-config.js` with telemetry disabled.
 - Production requires the protected `PROD` environment secret
   `APPLICATIONINSIGHTS_CONNECTION_STRING`.
-- The production workflow generates `RUM_CUTOFF_UTC` immediately before the
-  approval-gated build.
+- Push-triggered production deployments keep telemetry disabled.
+- To start an exercise, manually run **Deploy to Azure Static Web Apps**, set
+  `enable_rum` to `true`, and approve `PROD`. The workflow then generates
+  `RUM_CUTOFF_UTC` immediately before the approval-gated build.
 - The build rejects missing, expired, malformed, or greater-than-two-hour
   configurations.
 - The browser refuses to initialize after the cutoff and unloads the SDK at the
@@ -73,6 +75,11 @@ The automatic cutoff is the normal stop mechanism. For immediate mitigation,
 run the emergency rollback workflow against the last known-good pre-RUM commit.
 The rollback build disables telemetry by default. Follow with a normal revert
 pull request if the instrumentation must remain removed.
+
+A normal main-branch deployment also publishes telemetry-disabled configuration
+and can be used as a non-emergency stop after review. Future RUM exercises must
+always use the explicit manual `enable_rum` input; ordinary merges never start a
+new exercise.
 
 ## First supervised exercise
 

@@ -738,6 +738,10 @@ Validation checks completed:
   exercise. Recheck after Azure cost data is available.
 - Remaining verification: after the cutoff, confirm the public configuration is
   expired and no newer `AppPageViews` records arrive.
+- Post-deployment review found and corrected an unsafe repeat behavior: normal
+  main-branch deployments now keep RUM disabled. Only a manual workflow run with
+  `enable_rum: true`, followed by `PROD` approval, can start a new two-hour
+  exercise.
 
 ## Functional Verification
 
