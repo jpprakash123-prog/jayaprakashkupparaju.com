@@ -27,6 +27,13 @@ test("automated deployment marker remains visible", () => {
   assert.match(html, /Deployed automatically with GitHub Actions\./);
 });
 
+test("site discloses and loads privacy-safe browser monitoring", () => {
+  assert.match(html, /Anonymous, sampled performance telemetry/);
+  assert.match(html, /no names, form contents or persistent user identifiers/);
+  assert.match(html, /src=["']\/rum-config\.js["']/);
+  assert.match(html, /src=["']\/rum\.js["']/);
+});
+
 test("SRE website project showcases delivery and recovery skills", () => {
   assert.match(html, /Production Website SRE Lab/);
   assert.match(html, /Azure Static Web Apps/);
@@ -49,6 +56,9 @@ test("SRE project explains the production architecture", () => {
 
 test("public professional profiles are linked securely", () => {
   assert.match(html, /href=["']https:\/\/github\.com\/jpprakash123-prog["']/);
-  assert.match(html, /href=["']https:\/\/www\.linkedin\.com\/in\/jayaprakash-kupparaju-99108225\/["']/);
+  assert.match(
+    html,
+    /href=["']https:\/\/www\.linkedin\.com\/in\/jayaprakash-kupparaju-99108225\/["']/,
+  );
   assert.match(html, /rel=["']noopener noreferrer["']/);
 });

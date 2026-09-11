@@ -34,7 +34,7 @@ Cloudflare DNS
 Azure Static Web Apps
      |
      v
-index.html + profile.jpg + deployment-info.json
+index.html + profile.jpg + deployment-info.json + RUM assets
 ```
 
 1. A visitor requests either the apex or `www` HTTPS URL.
@@ -103,7 +103,9 @@ The build places only public website assets in `dist/`:
 dist/
 |-- index.html
 |-- profile.jpg
-`-- deployment-info.json
+|-- deployment-info.json
+|-- rum-config.js
+`-- rum.js
 ```
 
 `deployment-info.json` is generated for each Azure deployment and contains:
@@ -116,6 +118,11 @@ dist/
 
 It contains no credentials, user identities, account identifiers, or Azure
 subscription information.
+
+`rum-config.js` is generated with telemetry disabled for local and DEV builds.
+An approved production build can inject the browser-visible Application Insights
+connection string and an absolute two-hour cutoff from the protected `PROD`
+environment. `rum.js` contains the pinned, bundled privacy policy and SDK.
 
 ## Monitoring Flow
 
@@ -135,6 +142,10 @@ Availability alert -> Action Group email notification
 Azure Automation managed identity
      |
      `-- scheduled cutoff -> disable the web test
+
+Visitor browser (time-limited 10% sample)
+     |
+     `-- sanitized page/performance/error telemetry -> Application Insights
 ```
 
 The Automation identity has `Monitoring Contributor` only at the individual
@@ -188,6 +199,7 @@ reviewed change.
 | Recovery                     | Emergency rollback workflow and documented runbook  |
 | Infrastructure as Code       | Bicep for the monitoring foundation                 |
 | Monitoring and observability | Application Insights, Log Analytics and web test    |
+| Real User Monitoring         | Privacy-safe, sampled, time-limited browser SDK     |
 | Containers and Kubernetes    | Not implemented                                     |
 
 ## Architecture Status

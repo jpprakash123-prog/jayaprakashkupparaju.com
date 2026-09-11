@@ -11,6 +11,8 @@
     "ci": "npm run lint:html && npm test && npm run security && npm run build"
   },
   "devDependencies": {
+    "@microsoft/applicationinsights-web": "3.4.4",
+    "esbuild": "0.28.2",
     "html-validate": "10.0.0"
   },
   "engines": {
