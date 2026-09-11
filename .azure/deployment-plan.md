@@ -2,10 +2,9 @@
 
 ## Status
 
-Validated — privacy-safe Real User Monitoring passed application, workflow,
-privacy, security, dependency, cost, and fail-closed validation. Production
-telemetry is not enabled; the protected configuration is present only in the
-GitHub `PROD` environment.
+Deployed — privacy-safe Real User Monitoring is running as an approval-gated,
+two-hour production exercise. Ingestion and privacy verification passed; the
+absolute client cutoff is 2026-09-11T02:53:31Z.
 
 ## Objective
 
@@ -514,10 +513,9 @@ latency, synthetic error-rate, and error-budget indicators defined in
 
 ## 14. Privacy-Safe Real User Monitoring
 
-Status: Validated — source, build, workflow, tests, privacy notice, and operations
-documentation passed all pre-deployment checks. Production telemetry remains off
-until protected configuration, pull-request review, and a separate `PROD`
-deployment approval.
+Status: Deployed — PR #15 passed CI and a telemetry-disabled DEV preview, was
+merged, and deployed through the protected `PROD` environment. The supervised
+exercise stops browser telemetry at 2026-09-11T02:53:31Z.
 
 ### Objective
 
@@ -722,6 +720,24 @@ Validation checks completed:
   review, merge, and a separate `PROD` approval.
 - Live RBAC verification is not applicable because no identity or role
   assignment was created.
+
+### Production exercise result
+
+- Pull request: #15, merged after CI and telemetry-disabled DEV preview success.
+- Production content commit: `2f3143e`.
+- GitHub Actions deployment run: `34548331059`, succeeded.
+- Production assets: `rum-config.js` and `rum.js` returned HTTP 200.
+- Runtime configuration: enabled, 10% sampling, absolute cutoff
+  `2026-09-11T02:53:31Z`; connection string present but never displayed.
+- Controlled browser verification: an isolated sampled request reached the
+  Central US Application Insights ingestion endpoint and received HTTP 204.
+- Log Analytics verification: `AppPageViews` indexed one page view for the
+  sanitized root URL; anonymous and authenticated user-ID fields were empty.
+- Monitoring safety: the Standard availability test remained disabled.
+- Cost baseline: `$0.0538` actual resource-group cost month to date before the
+  exercise. Recheck after Azure cost data is available.
+- Remaining verification: after the cutoff, confirm the public configuration is
+  expired and no newer `AppPageViews` records arrive.
 
 ## Functional Verification
 
