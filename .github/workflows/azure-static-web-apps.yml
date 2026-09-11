@@ -2,6 +2,12 @@ name: Deploy to Azure Static Web Apps
 
 on:
   workflow_dispatch:
+    inputs:
+      enable_rum:
+        description: Enable the supervised two-hour Real User Monitoring exercise
+        required: true
+        default: false
+        type: boolean
   push:
     branches:
       - main
@@ -88,10 +94,12 @@ jobs:
         run: npm run ci
 
       - name: Set two-hour RUM cutoff
+        if: github.event_name == 'workflow_dispatch' && inputs.enable_rum
         shell: bash
         run: echo "RUM_CUTOFF_UTC=$(date -u -d '+2 hours' '+%Y-%m-%dT%H:%M:%SZ')" >> "$GITHUB_ENV"
 
       - name: Build privacy-safe production telemetry
+        if: github.event_name == 'workflow_dispatch' && inputs.enable_rum
         env:
           RUM_REQUIRED: "true"
           RUM_CONNECTION_STRING: ${{ secrets.APPLICATIONINSIGHTS_CONNECTION_STRING }}
