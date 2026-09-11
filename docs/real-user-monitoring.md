@@ -73,3 +73,19 @@ The automatic cutoff is the normal stop mechanism. For immediate mitigation,
 run the emergency rollback workflow against the last known-good pre-RUM commit.
 The rollback build disables telemetry by default. Follow with a normal revert
 pull request if the instrumentation must remain removed.
+
+## First supervised exercise
+
+- Production content commit: `2f3143e`.
+- Deployment workflow run: `34548331059`.
+- Started: 2026-09-11.
+- Absolute browser cutoff: `2026-09-11T02:53:31Z`.
+- Sampling: 10%.
+- Ingestion validation: Azure returned HTTP 204 for a sampled browser request.
+- Query validation: `AppPageViews` contained the sanitized root URL with empty
+  anonymous and authenticated user-ID fields.
+- Availability test: remained disabled.
+- Pre-exercise resource-group cost: `$0.0538` month to date.
+
+After the cutoff, verify that no later page-view timestamp appears and record the
+post-exercise cost when Cost Management has finished processing usage.
