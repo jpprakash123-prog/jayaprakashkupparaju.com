@@ -2,10 +2,10 @@
 
 ## Status
 
-Deployed — the approved SLO Workbook passed KQL schema checks, Bicep
-compilation, Azure template validation, what-if review, CI, security, cost,
-policy, provider, and static RBAC checks, then deployed successfully. The paid
-availability test remains disabled.
+Validated — privacy-safe Real User Monitoring passed application, workflow,
+privacy, security, dependency, cost, and fail-closed validation. Production
+telemetry is not enabled; the protected configuration is present only in the
+GitHub `PROD` environment.
 
 ## Objective
 
@@ -92,9 +92,9 @@ Microsoft's current Azure Static Web Apps documentation uses Central US for Stat
 
 Provisioning inventory and limits:
 
-| Resource type | Planned | Current usage | Limit | Result |
-|---|---:|---:|---:|---|
-| `Microsoft.Web/staticSites` (Free) | 1 | To be queried after authentication | 10 apps per subscription | Pre-deployment check required |
+| Resource type                      | Planned |                      Current usage |                    Limit | Result                        |
+| ---------------------------------- | ------: | ---------------------------------: | -----------------------: | ----------------------------- |
+| `Microsoft.Web/staticSites` (Free) |       1 | To be queried after authentication | 10 apps per subscription | Pre-deployment check required |
 
 Azure Static Web Apps uses an app-count subscription limit rather than a vCPU-style capacity quota. Execution will query existing Static Web Apps in the selected subscription and stop if creating one would exceed the documented Free-plan limit. Subscription policy, `Microsoft.Web` provider registration, Central US availability, and resource-creation permissions will also be checked before creation.
 
@@ -107,52 +107,65 @@ Azure Static Web Apps uses an app-count subscription limit rather than a vCPU-st
 
 ## 7. Validation Proof
 
-| Check | Command or method | Result | Timestamp |
-|---|---|---|---|
-| Azure authentication | `Get-AzContext` for the approved subscription | Pass — subscription verified out of band | 2026-08-20T23:40:32-05:00 |
-| Provider registration | `Get-AzResourceProvider -ProviderNamespace Microsoft.Web` | Pass — Registered | 2026-08-20T23:40:32-05:00 |
-| Capacity | `Get-AzStaticWebApp` plus documented Free-plan limit | Pass — 0 existing + 1 planned <= 10 | 2026-08-20T23:40:32-05:00 |
-| Region availability | `Microsoft.Web/staticSites` provider locations | Pass — Central US supported | 2026-08-20T23:40:32-05:00 |
-| Effective permissions | Azure permissions API at subscription scope | Pass — resource-group and Static Web App writes allowed | 2026-08-20T23:40:32-05:00 |
-| Azure policy | `Get-AzPolicyAssignment` at subscription scope | Pass — no blocking location/resource policy found | 2026-08-20T23:40:32-05:00 |
-| Workflow YAML | `npx --yes prettier@3.6.2 --check .github/workflows/azure-static-web-apps.yml` | Pass | 2026-08-20T23:40:32-05:00 |
-| Site source | HTML/JPEG/reference checks | Pass | 2026-08-20T23:40:32-05:00 |
-| GitHub Pages safety | Git blob hash comparison for `CNAME` | Pass — unchanged | 2026-08-20T23:40:32-05:00 |
-| Rollback workflow YAML | `prettier@3.6.2 --check` on workflow and plan files | Pass | 2026-09-03 |
-| Rollback workflow build | `npm run ci` | Pass — HTML, tests, sensitive-data scan, and build | 2026-09-03 |
-| Rollback target control | Static review of SHA format and `main` ancestry checks | Pass — unmerged commits rejected | 2026-09-03 |
-| Rollback secret isolation | Static review of job environment and permissions | Pass — token limited to approval-gated `PROD` job | 2026-09-03 |
-| Rollback RBAC | Static infrastructure and application review | Not applicable — no identity or role changes | 2026-09-03 |
-| Metadata workflow and script format | `prettier@3.6.2 --check` on modified executable, workflow, and documentation files | Pass | 2026-09-03 |
-| Metadata build verification | `npm run ci` | Pass — HTML, tests, sensitive-data scan, and build | 2026-09-03 |
-| Metadata functional verification | Generate and parse `dist/deployment-info.json` with representative deployment values | Pass — content commit, type, run ID, UTC, and Central weekday values verified | 2026-09-03 |
-| Metadata input validation | Run generator with a malformed commit value | Pass — rejected with nonzero exit | 2026-09-03 |
-| Metadata exposure review | Static review of generated fields | Pass — public build provenance only; no identity, account, or secret fields | 2026-09-03 |
-| Metadata RBAC | Static infrastructure and application review | Not applicable — no identity or role changes | 2026-09-03 |
-| Project showcase CI | `npm run ci` with command-scoped Git safe-directory configuration | Pass — HTML validation, 7 tests, sensitive-data scan, and build | 2026-09-06 |
-| Project showcase regression | `node --test tests` through the CI command | Pass — verifies project title, tools, rollback capability, and metadata link | 2026-09-06 |
-| Dependency security | `npm audit --audit-level=high` | Pass — 0 vulnerabilities | 2026-09-06 |
-| Source diff hygiene | `git diff --check` | Pass | 2026-09-06 |
-| Project showcase RBAC | Static infrastructure and application review | Not applicable — content-only change with no identity or role changes | 2026-09-06 |
-| Monitoring current cost | Cost Management `ActualCost`, month-to-date, scoped to `rg-personal-site-prod` | Pass — no cost rows returned before deployment | 2026-09-06 |
-| Monitoring Bicep compilation | `az bicep build --file infrastructure/monitoring/main.bicep --stdout` | Pass | 2026-09-06 |
-| Monitoring template validation | `Test-AzResourceGroupDeployment` using the compiled template | Pass — no validation errors | 2026-09-06 |
-| Monitoring what-if | `Get-AzResourceGroupDeploymentWhatIfResult` with `ResourceIdOnly` | Pass — six creates, no deletes or changes to the Static Web App | 2026-09-06 |
-| Monitoring providers | `Get-AzResourceProvider` | Pass — Insights, Operational Insights, and Automation registered | 2026-09-06 |
-| Monitoring policy | `Get-AzPolicyAssignment` at subscription scope | Pass — three assignments reviewed; template validation found no denial | 2026-09-06 |
-| Monitoring runbook syntax | PowerShell AST parser | Pass | 2026-09-06 |
-| Monitoring CI and security | `npm run ci` with command-scoped Git safe directory | Pass — seven tests, sensitive-data scan, and build | 2026-09-06 |
-| Monitoring RBAC | Static Bicep and runbook review | Pass — system identity receives Monitoring Contributor only at the web-test resource scope | 2026-09-06 |
-| SLO Workbook KQL | Five queries executed against the existing `AppAvailabilityResults` schema | Pass — coverage, SLO evaluation, percentiles, error budget, and daily trend returned valid results | 2026-09-10 |
-| SLO Workbook Bicep compilation | `az bicep build --file infrastructure/monitoring/slo-workbook.bicep` | Pass | 2026-09-10 |
-| SLO Workbook template validation | `Test-AzResourceGroupDeployment` using the compiled template | Pass — no validation errors | 2026-09-10 |
-| SLO Workbook what-if | `Get-AzResourceGroupDeploymentWhatIfResult` with `ResourceIdOnly` | Pass — one create, zero modifies, zero deletes; existing resources ignored | 2026-09-10 |
-| SLO Workbook monitoring safety | Read-back of `webtest-personal-site-prod` | Pass — availability test remains disabled | 2026-09-10 |
-| SLO Workbook current cost | Cost Management `ActualCost`, month-to-date, scoped to `rg-personal-site-prod` | Pass — `$0.00` before deployment | 2026-09-10 |
-| SLO Workbook providers and policy | Provider registration and subscription policy review | Pass — required providers registered; three assignments reviewed; template validation found no denial | 2026-09-10 |
-| SLO Workbook CI and security | `npm run ci` with command-scoped Git safe directory | Pass — HTML validation, 15 tests, sensitive-data scan, and build | 2026-09-10 |
-| SLO Workbook source hygiene | `git diff --cached --check` | Pass after removing one trailing blank line | 2026-09-10 |
-| SLO Workbook RBAC | Static Bicep review | Pass — no identity or role assignment is created; viewers use existing Entra ID and Azure RBAC | 2026-09-10 |
+| Check                               | Command or method                                                                    | Result                                                                                                | Timestamp                 |
+| ----------------------------------- | ------------------------------------------------------------------------------------ | ----------------------------------------------------------------------------------------------------- | ------------------------- |
+| Azure authentication                | `Get-AzContext` for the approved subscription                                        | Pass — subscription verified out of band                                                              | 2026-08-20T23:40:32-05:00 |
+| Provider registration               | `Get-AzResourceProvider -ProviderNamespace Microsoft.Web`                            | Pass — Registered                                                                                     | 2026-08-20T23:40:32-05:00 |
+| Capacity                            | `Get-AzStaticWebApp` plus documented Free-plan limit                                 | Pass — 0 existing + 1 planned <= 10                                                                   | 2026-08-20T23:40:32-05:00 |
+| Region availability                 | `Microsoft.Web/staticSites` provider locations                                       | Pass — Central US supported                                                                           | 2026-08-20T23:40:32-05:00 |
+| Effective permissions               | Azure permissions API at subscription scope                                          | Pass — resource-group and Static Web App writes allowed                                               | 2026-08-20T23:40:32-05:00 |
+| Azure policy                        | `Get-AzPolicyAssignment` at subscription scope                                       | Pass — no blocking location/resource policy found                                                     | 2026-08-20T23:40:32-05:00 |
+| Workflow YAML                       | `npx --yes prettier@3.6.2 --check .github/workflows/azure-static-web-apps.yml`       | Pass                                                                                                  | 2026-08-20T23:40:32-05:00 |
+| Site source                         | HTML/JPEG/reference checks                                                           | Pass                                                                                                  | 2026-08-20T23:40:32-05:00 |
+| GitHub Pages safety                 | Git blob hash comparison for `CNAME`                                                 | Pass — unchanged                                                                                      | 2026-08-20T23:40:32-05:00 |
+| Rollback workflow YAML              | `prettier@3.6.2 --check` on workflow and plan files                                  | Pass                                                                                                  | 2026-09-03                |
+| Rollback workflow build             | `npm run ci`                                                                         | Pass — HTML, tests, sensitive-data scan, and build                                                    | 2026-09-03                |
+| Rollback target control             | Static review of SHA format and `main` ancestry checks                               | Pass — unmerged commits rejected                                                                      | 2026-09-03                |
+| Rollback secret isolation           | Static review of job environment and permissions                                     | Pass — token limited to approval-gated `PROD` job                                                     | 2026-09-03                |
+| Rollback RBAC                       | Static infrastructure and application review                                         | Not applicable — no identity or role changes                                                          | 2026-09-03                |
+| Metadata workflow and script format | `prettier@3.6.2 --check` on modified executable, workflow, and documentation files   | Pass                                                                                                  | 2026-09-03                |
+| Metadata build verification         | `npm run ci`                                                                         | Pass — HTML, tests, sensitive-data scan, and build                                                    | 2026-09-03                |
+| Metadata functional verification    | Generate and parse `dist/deployment-info.json` with representative deployment values | Pass — content commit, type, run ID, UTC, and Central weekday values verified                         | 2026-09-03                |
+| Metadata input validation           | Run generator with a malformed commit value                                          | Pass — rejected with nonzero exit                                                                     | 2026-09-03                |
+| Metadata exposure review            | Static review of generated fields                                                    | Pass — public build provenance only; no identity, account, or secret fields                           | 2026-09-03                |
+| Metadata RBAC                       | Static infrastructure and application review                                         | Not applicable — no identity or role changes                                                          | 2026-09-03                |
+| Project showcase CI                 | `npm run ci` with command-scoped Git safe-directory configuration                    | Pass — HTML validation, 7 tests, sensitive-data scan, and build                                       | 2026-09-06                |
+| Project showcase regression         | `node --test tests` through the CI command                                           | Pass — verifies project title, tools, rollback capability, and metadata link                          | 2026-09-06                |
+| Dependency security                 | `npm audit --audit-level=high`                                                       | Pass — 0 vulnerabilities                                                                              | 2026-09-06                |
+| Source diff hygiene                 | `git diff --check`                                                                   | Pass                                                                                                  | 2026-09-06                |
+| Project showcase RBAC               | Static infrastructure and application review                                         | Not applicable — content-only change with no identity or role changes                                 | 2026-09-06                |
+| Monitoring current cost             | Cost Management `ActualCost`, month-to-date, scoped to `rg-personal-site-prod`       | Pass — no cost rows returned before deployment                                                        | 2026-09-06                |
+| Monitoring Bicep compilation        | `az bicep build --file infrastructure/monitoring/main.bicep --stdout`                | Pass                                                                                                  | 2026-09-06                |
+| Monitoring template validation      | `Test-AzResourceGroupDeployment` using the compiled template                         | Pass — no validation errors                                                                           | 2026-09-06                |
+| Monitoring what-if                  | `Get-AzResourceGroupDeploymentWhatIfResult` with `ResourceIdOnly`                    | Pass — six creates, no deletes or changes to the Static Web App                                       | 2026-09-06                |
+| Monitoring providers                | `Get-AzResourceProvider`                                                             | Pass — Insights, Operational Insights, and Automation registered                                      | 2026-09-06                |
+| Monitoring policy                   | `Get-AzPolicyAssignment` at subscription scope                                       | Pass — three assignments reviewed; template validation found no denial                                | 2026-09-06                |
+| Monitoring runbook syntax           | PowerShell AST parser                                                                | Pass                                                                                                  | 2026-09-06                |
+| Monitoring CI and security          | `npm run ci` with command-scoped Git safe directory                                  | Pass — seven tests, sensitive-data scan, and build                                                    | 2026-09-06                |
+| Monitoring RBAC                     | Static Bicep and runbook review                                                      | Pass — system identity receives Monitoring Contributor only at the web-test resource scope            | 2026-09-06                |
+| SLO Workbook KQL                    | Five queries executed against the existing `AppAvailabilityResults` schema           | Pass — coverage, SLO evaluation, percentiles, error budget, and daily trend returned valid results    | 2026-09-10                |
+| SLO Workbook Bicep compilation      | `az bicep build --file infrastructure/monitoring/slo-workbook.bicep`                 | Pass                                                                                                  | 2026-09-10                |
+| SLO Workbook template validation    | `Test-AzResourceGroupDeployment` using the compiled template                         | Pass — no validation errors                                                                           | 2026-09-10                |
+| SLO Workbook what-if                | `Get-AzResourceGroupDeploymentWhatIfResult` with `ResourceIdOnly`                    | Pass — one create, zero modifies, zero deletes; existing resources ignored                            | 2026-09-10                |
+| SLO Workbook monitoring safety      | Read-back of `webtest-personal-site-prod`                                            | Pass — availability test remains disabled                                                             | 2026-09-10                |
+| SLO Workbook current cost           | Cost Management `ActualCost`, month-to-date, scoped to `rg-personal-site-prod`       | Pass — `$0.00` before deployment                                                                      | 2026-09-10                |
+| SLO Workbook providers and policy   | Provider registration and subscription policy review                                 | Pass — required providers registered; three assignments reviewed; template validation found no denial | 2026-09-10                |
+| SLO Workbook CI and security        | `npm run ci` with command-scoped Git safe directory                                  | Pass — HTML validation, 15 tests, sensitive-data scan, and build                                      | 2026-09-10                |
+| SLO Workbook source hygiene         | `git diff --cached --check`                                                          | Pass after removing one trailing blank line                                                           | 2026-09-10                |
+| SLO Workbook RBAC                   | Static Bicep review                                                                  | Pass — no identity or role assignment is created; viewers use existing Entra ID and Azure RBAC        | 2026-09-10                |
+
+| RUM clean dependency install | `npm ci` | Pass — pinned dependency graph installed from the lockfile | 2026-09-10 |
+| RUM application CI | `npm run ci` | Pass — HTML validation, 24 tests, staged-file sensitive-data scan, and telemetry-disabled build | 2026-09-10 |
+| RUM dependency security | `npm audit --audit-level=high` | Pass — zero known vulnerabilities | 2026-09-10 |
+| RUM privacy policy | Unit tests for URL sanitization, identity removal, disabled cookies/storage/dependency tracking, and prohibited authenticated context | Pass | 2026-09-10 |
+| RUM workflow isolation | Static tests of normal and emergency workflows | Pass — configuration exists only in protected `PROD`; DEV and rollback remain telemetry-off | 2026-09-10 |
+| RUM fail-closed controls | Production builds with missing configuration and excessive cutoff | Pass — both rejected; default disabled build restored | 2026-09-10 |
+| RUM representative build | Fake instrumentation key with a two-hour cutoff | Pass — enabled bundle, 10% sampling, cutoff, identity removal, and no source map verified; no telemetry transmitted | 2026-09-10 |
+| RUM formatting and workflow syntax | `prettier@3.6.2 --check` on implementation, workflow, tests, and documentation | Pass after formatting `docs/architecture.md` | 2026-09-10 |
+| RUM current cost | Cost Management `ActualCost`, month-to-date, scoped to `rg-personal-site-prod` | Pass — `$0.0538` before the exercise | 2026-09-10 |
+| RUM Azure state | Read-only Application Insights linkage and web-test state checks | Pass — existing workspace linked; availability test disabled; zero new resources | 2026-09-10 |
+| RUM RBAC | Static infrastructure and application review | Not applicable — no identity or role assignment is added | 2026-09-10 |
+| RUM protected configuration | Direct Azure-to-GitHub transfer followed by secret-name inventory | Pass — connection string stored in protected `PROD` without displaying or committing its value | 2026-09-10 |
 
 Validated by: Azure validation workflow.
 
@@ -189,12 +202,12 @@ If Azure deployment or validation fails, no DNS rollback is needed because traff
 
 ## Files Expected During Execution
 
-| File | Purpose |
-|---|---|
-| `.azure/deployment-plan.md` | Deployment decisions, checklist, and validation proof |
+| File                                                     | Purpose                                                                  |
+| -------------------------------------------------------- | ------------------------------------------------------------------------ |
+| `.azure/deployment-plan.md`                              | Deployment decisions, checklist, and validation proof                    |
 | `.github/workflows/<azure-static-web-apps-workflow>.yml` | New Azure deployment workflow; existing Pages behavior remains unchanged |
-| `docs/deployment.md` | Deployment and validation record |
-| `docs/architecture.md` | Parallel-hosting architecture after successful Azure validation |
+| `docs/deployment.md`                                     | Deployment and validation record                                         |
+| `docs/architecture.md`                                   | Parallel-hosting architecture after successful Azure validation          |
 
 ## Research Summary
 
@@ -276,15 +289,15 @@ Approved by the user on 2026-09-06 with a strict `$10` annual ceiling.
 Create these resources in the existing `rg-personal-site-prod` resource group
 in Central US:
 
-| Resource | Proposed name | Purpose |
-|---|---|---|
-| Log Analytics workspace | `log-personal-site-prod` | Store and query availability results |
-| Application Insights | `appi-personal-site-prod` | Observability experience linked to the workspace |
-| Standard availability test | `webtest-personal-site-prod` | Exercise the public production URL from Azure test locations |
-| Azure Monitor action group | `ag-personal-site-prod` | Notify an out-of-band recipient; address is never committed |
-| Availability alert | `alert-personal-site-unavailable` | Detect customer-visible failures across multiple locations |
-| Automation account | `aa-personal-site-guard` | Run the independent test-disable safety control |
-| Automation runbook | `Disable-PersonalSiteWebTest` | Disable the billable test at the fixed cutoff |
+| Resource                   | Proposed name                     | Purpose                                                      |
+| -------------------------- | --------------------------------- | ------------------------------------------------------------ |
+| Log Analytics workspace    | `log-personal-site-prod`          | Store and query availability results                         |
+| Application Insights       | `appi-personal-site-prod`         | Observability experience linked to the workspace             |
+| Standard availability test | `webtest-personal-site-prod`      | Exercise the public production URL from Azure test locations |
+| Azure Monitor action group | `ag-personal-site-prod`           | Notify an out-of-band recipient; address is never committed  |
+| Availability alert         | `alert-personal-site-unavailable` | Detect customer-visible failures across multiple locations   |
+| Automation account         | `aa-personal-site-guard`          | Run the independent test-disable safety control              |
+| Automation runbook         | `Disable-PersonalSiteWebTest`     | Disable the billable test at the fixed cutoff                |
 
 No managed identity, role assignment, browser SDK, connection string, or
 application change is required for this external test.
@@ -498,6 +511,217 @@ latency, synthetic error-rate, and error-budget indicators defined in
 - `infrastructure/monitoring/slo-workbook.json`
 - `tests/slo-workbook.test.mjs`
 - SLO documentation updated with dashboard behavior and limitations.
+
+## 14. Privacy-Safe Real User Monitoring
+
+Status: Validated — source, build, workflow, tests, privacy notice, and operations
+documentation passed all pre-deployment checks. Production telemetry remains off
+until protected configuration, pull-request review, and a separate `PROD`
+deployment approval.
+
+### Objective
+
+Add privacy-minimized browser monitoring to the existing static website while
+preserving the project's strict annual cost boundary.
+
+### What this teaches
+
+- Synthetic monitoring measures an engineered test from Azure locations; Real
+  User Monitoring measures the experience of actual browsers.
+- Browser telemetry helps identify client-side errors and slow page loads that a
+  simple HTTP availability check cannot reveal.
+- Privacy, cardinality, sampling, retention, and ingestion limits are part of an
+  SRE telemetry design, not post-deployment cleanup.
+
+### Requirements and existing components
+
+| Attribute              | Decision                                                                    |
+| ---------------------- | --------------------------------------------------------------------------- |
+| Mode                   | Modify an existing production static website                                |
+| Classification         | Small production learning project                                           |
+| Budget                 | Cost optimized; absolute project goal below `$10` per year                  |
+| Hosting                | Existing Azure Static Web Apps Free plan                                    |
+| Region                 | Reuse previously approved Central US resources                              |
+| Application monitoring | Reuse `appi-personal-site-prod`                                             |
+| Log storage            | Reuse `log-personal-site-prod` with 30-day retention and `0.023 GB/day` cap |
+| Availability test      | Keep disabled                                                               |
+| New Azure resources    | None                                                                        |
+
+The site is static HTML with a Node.js build script. GitHub Actions builds
+`dist/`, deploys pull requests through `DEV`, and gates `main` deployments with
+the protected `PROD` environment. No specialized SDK, API, backend, container,
+or server-side runtime was detected.
+
+### Selected architecture
+
+```text
+Visitor browser
+  |-- page-load timing, anonymous page view, JavaScript failure
+  v
+Application Insights browser SDK (10% sample; two-hour absolute cutoff)
+  v
+appi-personal-site-prod
+  v
+log-personal-site-prod (30-day retention; daily ingestion cap)
+  |-- Application Insights usage/performance views
+  `-- KQL investigation
+```
+
+- Use the supported Application Insights JavaScript browser SDK, pinned as an
+  npm development dependency and bundled locally for deterministic builds.
+- Add a small source module for telemetry policy and a build-time instrumenter.
+- Keep the Application Insights connection string out of source control. Read it
+  from the protected GitHub `PROD` environment secret
+  `APPLICATIONINSIGHTS_CONNECTION_STRING` during the production build.
+- The connection string will necessarily be visible in the delivered browser
+  JavaScript. It is an ingestion destination, not an authorization credential;
+  storing it as an environment secret prevents account-specific configuration
+  from entering Git history.
+- DEV previews build with telemetry disabled and a visible diagnostic marker in
+  browser developer tools. Unit tests validate their configuration without
+  sending telemetry into the production resource.
+- Production instrumentation is enabled only when both the connection string
+  and a future UTC cutoff are supplied by the approval-gated job.
+- The first exercise lasts at most two hours. The browser checks the absolute
+  cutoff before SDK initialization, so an abandoned deployment stops creating
+  new telemetry without a later workflow, Automation job, or human action.
+
+### Privacy controls
+
+Collect only:
+
+- Sanitized page path and anonymous page-view count.
+- Page-load and browser performance timing.
+- JavaScript exceptions generated by this website.
+- Coarse browser, device, and geographic dimensions supplied by Azure Monitor.
+
+Explicitly prohibit:
+
+- Names, email addresses, usernames, authenticated IDs, or custom user IDs.
+- Form values, typed text, DOM contents, click coordinates, or session replay.
+- Full IP addresses, URL query strings, URL fragments, request/response headers,
+  or arbitrary custom properties.
+
+Configure the SDK with cookies and local/session storage disabled, no click
+analytics, no AJAX/fetch dependency tracking, no authenticated user context, and
+10% sampling. Sanitize every page-view URL to origin plus path before sending.
+Add a short privacy disclosure to the public site explaining anonymous
+operational telemetry during controlled exercises.
+
+### Cost controls
+
+- Create no new Azure resources and keep the Standard availability test off.
+- The two-hour cutoff is the primary hard duration control; 10% sampling reduces
+  volume during that window.
+- Retain the existing 30-day workspace retention, `0.023 GB/day` ingestion cap,
+  `$10` resource-group budget, and weekly cost email.
+- Check resource-group cost immediately before the exercise and again after cost
+  data becomes available.
+- Do not claim that Application Insights is unconditionally free. Billing is
+  based mainly on Log Analytics ingestion and retention, and budget alerts are
+  notifications rather than spending stops.
+- Do not approve production if the pre-exercise resource-group cost or pricing
+  review indicates the annual ceiling could be exceeded.
+
+### Provisioning and quota result
+
+| Resource type                              | New | Existing used | Capacity result                          |
+| ------------------------------------------ | --: | ------------: | ---------------------------------------- |
+| `Microsoft.Insights/components`            |   0 |             1 | No provisioning; reuse existing resource |
+| `Microsoft.OperationalInsights/workspaces` |   0 |             1 | No provisioning; reuse existing resource |
+
+The Azure Quotas workflow was reviewed. Quota CLI lookup is not applicable
+because this change provisions zero Azure resources and consumes no regional
+compute quota. Live read-only checks confirmed both resources exist and are
+linked, the 30-day retention and daily cap remain set, and the web test is
+disabled.
+
+### Files and workflow changes planned
+
+- Add a browser telemetry source module and deterministic build step.
+- Update `scripts/build.mjs` to produce an instrumented production bundle only
+  when explicitly configured.
+- Update the normal production workflow to supply the protected connection
+  string and two-hour cutoff after `PROD` approval.
+- Keep pull-request previews telemetry-off.
+- Keep emergency rollback telemetry-off by default, reducing variables during an
+  incident; rolling back to a pre-RUM commit also removes the instrumentation.
+- Add regression tests for disabled-by-default behavior, cutoff enforcement,
+  URL sanitization, sampling, and prohibited identity/storage features.
+- Document RUM queries, privacy controls, validation, cost review, and disable
+  procedure.
+
+### Validation and release
+
+1. Install and audit the pinned SDK/build dependencies.
+2. Run HTML validation, unit tests, sensitive-data scan, build, and dependency
+   audit.
+3. Verify a normal local and DEV build contains no connection string and sends
+   no telemetry.
+4. Build with representative non-production values and verify configuration,
+   URL sanitization, 10% sampling, and cutoff behavior without transmitting.
+5. Confirm Git history and staged files contain no actual connection string,
+   account identifier, recipient address, or personal data.
+6. Deploy to DEV with telemetry disabled and inspect the page and developer
+   console.
+7. Merge only after review; configure the real connection string directly as a
+   protected `PROD` environment secret outside Git.
+8. Set the cutoff immediately before approving production, deploy, and confirm
+   a page view reaches Application Insights.
+9. Confirm telemetry stops after the cutoff and compare actual cost with the
+   pre-exercise baseline.
+
+Validation checks completed:
+
+- [x] Clean dependency installation and dependency audit
+- [x] HTML validation, unit tests, staged-file sensitive-data scan, and build
+- [x] Telemetry-disabled local/DEV configuration
+- [x] Fake-value production bundle with 10% sampling and two-hour cutoff
+- [x] Missing/expired/excessive configuration rejection
+- [x] URL sanitization and user-identity removal
+- [x] Production-only secret boundary and telemetry-off emergency rollback
+- [x] Workflow/document formatting and source-diff hygiene
+- [x] Actual-cost and existing Azure monitoring-state checks
+- [x] Static RBAC review; no identity or role assignment introduced
+
+### Recovery
+
+- Immediate mitigation: run the existing emergency rollback workflow to a
+  pre-RUM production commit. The rollback job does not inject browser telemetry.
+- Normal correction: revert the instrumentation commit through a pull request.
+- If telemetry is unexpected, do not delete monitoring resources. Stop browser
+  emission through rollback/redeployment, preserve evidence, inspect ingestion,
+  and document the incident.
+- Resource deletion remains destructive and requires separate approval.
+
+### Preparation result
+
+- Added pinned Application Insights browser SDK and esbuild dependencies; npm
+  reported zero known vulnerabilities.
+- Added a privacy policy module, browser initializer, and generated build-time
+  configuration with telemetry disabled by default.
+- Added production-only protected configuration and an absolute two-hour cutoff
+  to the normal deployment workflow; DEV and emergency rollback remain off.
+- Added public disclosure and operator documentation.
+- `npm run ci` passed HTML validation, 24 tests, the sensitive-data scan, and a
+  telemetry-disabled build.
+- A representative build using a fake instrumentation key verified enabled
+  configuration, 10% sampling, cutoff generation, local bundling without source
+  maps, and restoration to the default disabled build.
+- No Azure resource, GitHub secret, or production site was changed during
+  preparation.
+
+### Deployment configuration result
+
+- The existing Application Insights connection string was transferred directly
+  into the protected GitHub `PROD` environment as
+  `APPLICATIONINSIGHTS_CONNECTION_STRING`.
+- The value was not displayed, written to a local file, or committed.
+- This configuration alone does not enable telemetry. The current `main`
+  workflow does not consume it; the validated feature must still pass DEV
+  review, merge, and a separate `PROD` approval.
+- Live RBAC verification is not applicable because no identity or role
+  assignment was created.
 
 ## Functional Verification
 
