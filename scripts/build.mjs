@@ -10,6 +10,7 @@ await rm(outputDirectory, { recursive: true, force: true });
 await mkdir(outputDirectory, { recursive: true });
 await cp(resolve("index.html"), resolve(outputDirectory, "index.html"));
 await cp(resolve("profile.jpg"), resolve(outputDirectory, "profile.jpg"));
+await cp(resolve("projects"), resolve(outputDirectory, "projects"), { recursive: true });
 
 const rumConfig = createRumBuildConfig(process.env);
 await writeFile(

@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Building My Portfolio on Azure | Jayaprakash Kupparaju</title>
+    <meta name="description" content="An engineering case study of my Azure portfolio: automated delivery, production approvals, rollback, and lessons from a small SRE monitoring exercise.">
+    <style>
+        * { box-sizing: border-box; }
+        body { margin: 0; background: #f8fafc; color: #1e293b; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif; line-height: 1.75; }
+        a { color: #0369a1; text-underline-offset: 4px; }
+        a:hover { text-decoration-thickness: 2px; }
+        a:focus-visible { outline: 3px solid #0284c7; outline-offset: 5px; }
+        .skip { position: absolute; left: 16px; top: -80px; background: white; padding: 12px; }
+        .skip:focus { top: 12px; }
+        nav { background: #0f172a; padding: 20px max(6%, calc((100% - 1080px) / 2)); display: flex; flex-wrap: wrap; gap: 12px 28px; justify-content: space-between; }
+        nav a { color: #e2e8f0; }
+        .brand { font-weight: 700; text-decoration: none; }
+        header { background: linear-gradient(135deg, #0f172a, #1e3a5f); color: white; padding: 72px 6%; }
+        .hero-inner, main, footer { max-width: 1080px; margin: auto; }
+        .eyebrow { color: #7dd3fc; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; font-size: .8rem; }
+        h1 { font-size: clamp(2.2rem, 5vw, 3.8rem); line-height: 1.15; max-width: 800px; margin: 18px 0 24px; }
+        .intro { color: #e2e8f0; font-size: 1.2rem; max-width: 740px; }
+        .meta { color: #cbd5e1; font-size: .9rem; margin-top: 28px; }
+        main { padding: 48px 24px; }
+        .contents { background: #e2e8f0; border-radius: 12px; padding: 24px; }
+        .contents p { margin-top: 0; }
+        .contents ul { display: flex; flex-wrap: wrap; gap: 12px 28px; list-style: none; padding: 0; margin: 0; }
+        section { padding: 32px 0; border-bottom: 1px solid #cbd5e1; }
+        h2 { color: #0f172a; font-size: 1.8rem; line-height: 1.3; }
+        h3 { color: #0f172a; font-size: 1.15rem; }
+        p, li { max-width: 80ch; }
+        li + li { margin-top: 8px; }
+        .grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 20px; }
+        .card { background: white; border: 1px solid #e2e8f0; padding: 24px; border-radius: 12px; }
+        .card h3 { margin-top: 0; }
+        figure { margin: 24px 0; }
+        .flow { list-style: none; padding: 0; display: grid; gap: 12px; }
+        .flow li { margin: 0; max-width: none; background: #0f172a; color: white; padding: 16px 24px; border-radius: 8px; }
+        .flow span { display: block; color: #cbd5e1; font-size: .95rem; }
+        .flow li + li::before { content: "\2193"; display: block; color: #7dd3fc; font-size: 1.3rem; }
+        figcaption, .note { color: #475569; font-size: .95rem; }
+        .table-wrap { overflow-x: auto; }
+        table { border-collapse: collapse; width: 100%; background: white; }
+        caption { text-align: left; font-weight: 600; padding-bottom: 12px; }
+        th, td { text-align: left; padding: 14px; border-bottom: 1px solid #cbd5e1; }
+        thead { background: #e2e8f0; }
+        .callout { border-left: 4px solid #0284c7; padding: 16px 24px; background: #e0f2fe; }
+        code { overflow-wrap: anywhere; }
+        footer { padding: 24px 24px 48px; color: #475569; }
+        @media (max-width: 640px) { .grid { grid-template-columns: 1fr; } header { padding: 48px 24px; } th, td { padding: 10px; } }
+    </style>
+</head>
+<body>
+    <a class="skip" href="#main">Skip to case study</a>
+    <nav aria-label="Main navigation">
+        <a class="brand" href="/">Jayaprakash Kupparaju</a>
+        <a href="/#projects">Back to projects &rarr;</a>
+    </nav>
+    <header>
+        <div class="hero-inner">
+            <p class="eyebrow">Engineering case study · Cloud / DevOps / SRE</p>
+            <h1>Building my portfolio on Azure</h1>
+            <p class="intro">A personal website became a practical place to learn how to release changes safely, measure reliability, and prepare for recovery.</p>
+            <p class="meta">By Jayaprakash Kupparaju · Published September 21, 2026<br>Evidence reviewed through September 17, 2026 · An evolving learning project</p>
+        </div>
+    </header>
+    <main id="main">
+        <aside class="contents" aria-label="On this page">
+            <p><strong>Inside the project</strong></p>
+            <ul>
+                <li><a href="#goal">The goal</a></li>
+                <li><a href="#architecture">Architecture</a></li>
+                <li><a href="#delivery">Delivery &amp; recovery</a></li>
+                <li><a href="#results">Measured results</a></li>
+                <li><a href="#lessons">Lessons &amp; next steps</a></li>
+            </ul>
+        </aside>
+        <section id="goal">
+            <h2>A small website, real operational decisions</h2>
+            <p>I wanted a home for my projects and learning, and a working system where I could practice SRE. A public website creates concrete questions: how do I review a change before visitors see it, identify the version in production, detect failures, and recover?</p>
+            <p>I kept the frontend as static HTML and CSS and used the delivery and monitoring systems around it to develop those skills. The project also has a strict $10 annual budget boundary, so monitoring must be deliberate and time limited.</p>
+            <div class="grid">
+                <div class="card">
+                    <h3>What is implemented</h3>
+                    <p>Azure hosting, a custom domain, automated validation, pull-request previews, production approvals, deployment metadata, an emergency rollback workflow, and an observability lab.</p>
+                </div>
+                <div class="card">
+                    <h3>What the evidence supports</h3>
+                    <p>A working delivery process and a small, measured reliability exercise. Continuous monthly uptime and long-term latency performance are not established.</p>
+                </div>
+            </div>
+        </section>
+        <section id="architecture">
+            <h2>How the website reaches a visitor</h2>
+            <p>Cloudflare manages DNS, and Azure Static Web Apps hosts the public files and provides managed HTTPS. GitHub stores the source; GitHub Actions builds and deploys it.</p>
+            <figure>
+                <ol class="flow">
+                    <li><strong>1. Visitor opens the domain</strong><span>The browser looks up jayaprakashkupparaju.com.</span></li>
+                    <li><strong>2. Cloudflare DNS resolves the name</strong><span>DNS directs the browser to Azure Static Web Apps; it does not serve the page content.</span></li>
+                    <li><strong>3. The browser connects to Azure over HTTPS</strong><span>Azure serves the deployed HTML, images, and JavaScript.</span></li>
+                </ol>
+                <figcaption>DNS resolution and content delivery are separate steps. A failure in either can prevent a successful visit.</figcaption>
+            </figure>
+            <p>During supervised exercises, an external availability test checks the public HTTPS path. Results flow into Application Insights and Log Analytics; KQL queries and an Azure Workbook evaluate the observations against my reliability targets.</p>
+            <p class="note">The paid availability test stays disabled outside supervised exercises. Browser performance monitoring is also disabled in normal builds.</p>
+        </section>
+        <section id="delivery">
+            <h2>Make releases reviewable and recovery traceable</h2>
+            <ol>
+                <li><strong>Change and validate.</strong> A feature branch and pull request run HTML validation, site tests, a sensitive-data check, a build, and a dependency audit.</li>
+                <li><strong>Preview.</strong> The pull request gets a temporary Azure deployment through the DEV environment so the change can be inspected before release.</li>
+                <li><strong>Approve production.</strong> Merging to protected main starts a PROD deployment that requires human approval. Deployment secrets are scoped to each environment.</li>
+                <li><strong>Identify the release.</strong> A public <a href="/deployment-info.json">deployment metadata file</a> records the actual content commit and deployment time.</li>
+            </ol>
+            <h3>Recovery includes correcting the source</h3>
+            <p>The emergency workflow validates an exact known-good commit from main before an approved rollback. Deployment metadata identifies the restored content even when the rollback workflow itself runs from a newer commit.</p>
+            <p>Restoring deployed files does not fix main. The recovery procedure also calls for a revert pull request and verification before normal releases resume, preventing the faulty change from being deployed again.</p>
+        </section>
+        <section id="results">
+            <h2>What the first monitoring exercise showed</h2>
+            <p>The availability exercise captured ten checks between September 6 at 22:56:35 UTC and September 7 at 01:04:48 UTC, 2026. Those observations were later reviewed through the SLO Workbook.</p>
+            <div class="table-wrap">
+                <table>
+                    <caption>Historical exercise results — ten checks, not a monthly report</caption>
+                    <thead><tr><th scope="col">Indicator</th><th scope="col">Initial target</th><th scope="col">Observed sample</th></tr></thead>
+                    <tbody>
+                        <tr><th scope="row">Availability</th><td>99.9% successful checks</td><td>10 of 10 succeeded (100%)</td></tr>
+                        <tr><th scope="row">Latency compliance</th><td>95% of successful checks under 500 ms</td><td>7 of 10 under 500 ms (70%)</td></tr>
+                        <tr><th scope="row">Synthetic error rate</th><td>Fewer than 1% failed checks</td><td>0 of 10 failed (0%)</td></tr>
+                    </tbody>
+                </table>
+            </div>
+            <p>Average duration was 508 ms, with a P50 of 409 ms and a P95 of 1,282 ms. Every check succeeded, but the sample did not meet the latency target. Availability alone did not describe the full experience.</p>
+            <p class="callout"><strong>Missing measurements remain unknown.</strong> Ten checks cannot establish a production trend or continuous 30-day SLO compliance. Periods when monitoring is disabled are not counted as successful service time.</p>
+            <h3>Validate the measurement system too</h3>
+            <p>On September 17 UTC, the deployed Workbook configuration matched its repository source and all five KQL queries executed successfully. This verified the configuration and query results; it did not verify the Workbook's visual rendering in the Azure Portal.</p>
+            <p>A separate time-boxed browser monitoring exercise produced three page views and three browser timing events. Closeout found no events after the cutoff, no user IDs, and no unsanitized URLs in the returned data. That is evidence from a limited exercise, rather than a claim about every possible browser session.</p>
+        </section>
+        <section id="lessons">
+            <h2>Lessons I am carrying forward</h2>
+            <ul>
+                <li><strong>A reachable page can still be slow.</strong> I need to investigate latency during the next supervised exercise before changing the target.</li>
+                <li><strong>Monitoring coverage is part of the result.</strong> A reliability percentage needs its sample size, collection window, and missing periods alongside it.</li>
+                <li><strong>Rollback and source recovery belong together.</strong> The deployed version and repository history must be brought back into alignment.</li>
+                <li><strong>Cost controls need concrete mechanisms.</strong> Budget alerts provide visibility; time-boxed exercises and an automation cutoff limit monitoring activity.</li>
+            </ul>
+            <h3>Next steps</h3>
+            <p>I plan to investigate the observed latency, continue SLO and cost reviews, and work toward repeatable Terraform provisioning. A backend will be introduced when a portfolio feature needs it, giving the next layer of instrumentation a practical purpose.</p>
+        </section>
+        <section aria-labelledby="evidence-title">
+            <h2 id="evidence-title">Explore the engineering evidence</h2>
+            <p>The source documentation preserves the measurement definitions, validation results, and recovery procedure behind this write-up.</p>
+            <ul>
+                <li><a href="https://github.com/jpprakash123-prog/jayaprakashkupparaju.com/blob/main/docs/architecture.md">Architecture and request flow</a></li>
+                <li><a href="https://github.com/jpprakash123-prog/jayaprakashkupparaju.com/blob/main/docs/cicd.md">CI/CD and deployment metadata</a></li>
+                <li><a href="https://github.com/jpprakash123-prog/jayaprakashkupparaju.com/blob/main/docs/slo.md">SLO definitions and measured results</a></li>
+                <li><a href="https://github.com/jpprakash123-prog/jayaprakashkupparaju.com/blob/main/docs/real-user-monitoring.md">Browser monitoring exercise and closeout</a></li>
+                <li><a href="https://github.com/jpprakash123-prog/jayaprakashkupparaju.com/blob/main/runbooks/production-rollback.md">Production rollback runbook</a></li>
+            </ul>
+        </section>
+    </main>
+    <footer><a href="/#projects">&larr; Back to all projects</a><p>Jayaprakash Kupparaju · Cloud · DevOps · SRE · Continuous learning</p></footer>
+</body>
+</html>

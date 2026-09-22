@@ -39,8 +39,9 @@ npm run ci
 npm audit --audit-level=high
 ```
 
-The build command creates `dist/` containing only `index.html` and
-`profile.jpg`. The generated directory is ignored by Git.
+The build command creates `dist/` containing `index.html`, `profile.jpg`,
+the `projects/` case study pages, and generated RUM assets. Deployment workflows
+add `deployment-info.json`. The generated directory is ignored by Git.
 
 ## GitHub Workflows
 
