@@ -27,7 +27,7 @@ Each stage of the project will introduce another layer of production engineering
 
 ## Current Status
 
-The project currently consists of a static HTML website hosted using **GitHub Pages**, with the custom domain managed through **Cloudflare DNS**.
+The project currently consists of a static HTML website hosted using **Azure Static Web Apps**, with the custom domain managed through **Cloudflare DNS**. GitHub Pages is retained as a documented fallback.
 
 ```text
 User Browser
@@ -39,7 +39,7 @@ jayaprakashkupparaju.com
 Cloudflare DNS
      |
      v
-GitHub Pages
+Azure Static Web Apps
      |
      v
 GitHub Repository
@@ -56,11 +56,11 @@ index.html
 | Registrar | Cloudflare Registrar |
 | DNS | Cloudflare DNS |
 | Source Control | GitHub |
-| Hosting | GitHub Pages |
+| Hosting | Azure Static Web Apps (Free plan) |
 | Frontend | HTML / CSS |
-| CI/CD | GitHub Pages built-in deployment |
+| CI/CD | GitHub Actions with preview and approved production deployments |
 | Infrastructure as Code | Planned |
-| Observability | Planned |
+| Observability | Cost-controlled Application Insights lab, SLO Workbook, and time-boxed RUM |
 | Containers | Planned |
 | Kubernetes | Planned |
 | AI-assisted SRE | Planned |

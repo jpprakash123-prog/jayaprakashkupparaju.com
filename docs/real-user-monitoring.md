@@ -96,3 +96,63 @@ new exercise.
 
 After the cutoff, verify that no later page-view timestamp appears and record the
 post-exercise cost when Cost Management has finished processing usage.
+
+## Closeout verification
+
+Closeout was verified on September 17, 2026 UTC (September 16 local time), after
+device-code authentication restored Azure CLI access. Source code alone was not
+used as evidence that telemetry stopped.
+
+| Live observation | Result |
+|---|---|
+| Page views since September 11 | 3 |
+| Last page view | September 11, 01:07:27.152 UTC |
+| Browser timing events | 3 |
+| Last browser timing event | September 11, 01:08:44.661 UTC |
+| Exception events in the queried window | None returned |
+| Events after the 02:53:31 UTC cutoff | 0 across these tables |
+| Events with user identity fields | 0 |
+| URLs with query strings or fragments | 0 |
+| Paid availability test | Disabled (`Enabled=false`) |
+
+These are observed, sampled results through the verification time; they do not
+prove that every browser generated no telemetry. No new exercise was enabled.
+
+Azure Cost Management returned **$0.05376 USD** actual resource-group cost month
+to date, with usage rows through September 16 and no additional result pages.
+Azure Monitor accounts for $0.05376; Automation and Log Analytics each report
+$0.00. The nonzero charge is dated September 6. Rows for September 11 report
+$0.00 for Azure Monitor and Log Analytics. At four decimal places, the total
+matches the recorded pre-exercise $0.0538; no additional charge is reported.
+These are reported costs as of verification, subject to billing adjustments.
+
+The cost request used `ActualCost`, `MonthToDate`, daily granularity, a sum of
+`Cost`, and grouping by `ServiceName`, scoped to the project resource group.
+
+Run this query in the exercise's Log Analytics workspace. Use event timestamps,
+not ingestion timestamps: buffered events may arrive after the cutoff.
+
+```kusto
+let ExerciseStart = datetime(2026-09-11T00:00:00Z);
+let Cutoff = datetime(2026-09-11T02:53:31Z);
+AppPageViews
+| where TimeGenerated between (ExerciseStart .. now())
+| summarize PageViews=count(), FirstEvent=min(TimeGenerated),
+    LastEvent=max(TimeGenerated), EventsAfterCutoff=countif(TimeGenerated > Cutoff),
+    UnsanitizedUrls=countif(Url contains '?' or Url contains '#'),
+    EventsWithUserIds=countif(isnotempty(UserId) or isnotempty(UserAuthenticatedId))
+```
+
+Require a nonzero sample before interpreting zero violations as evidence. Check
+`AppExceptions` and `AppBrowserTimings` for later events as well if those tables
+contain exercise telemetry. Investigate later events before closing the exercise,
+including whether a subsequent exercise generated them.
+
+Query resource-group actual cost month to date, grouped daily by service. Record
+currency, query time, latest usage date, total, and service totals. Compare with
+the pre-exercise `$0.0538`, but do not attribute the entire difference to RUM:
+other resource-group usage can contribute. Incomplete billing data stays pending.
+
+Confirm the availability test is disabled and run all five deployed workbook
+queries. Record coverage alongside the error-budget result; an observed sample
+does not establish continuous 30-day availability.

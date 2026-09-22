@@ -155,3 +155,24 @@ The source-controlled Azure Workbook is defined by:
 It queries the existing Analytics table only when opened. It does not enable
 the availability test, ingest telemetry, schedule queries, or change alerting.
 Always inspect its measurement-coverage result before interpreting an SLO.
+
+## Live dashboard validation
+
+On September 17, 2026 UTC (September 16 local time), the deployed workbook's
+serialized content matched repository source after workspace substitution.
+All five deployed KQL queries executed successfully against the existing
+workspace. This verifies configuration and query results, not visual rendering
+in the Azure Portal.
+
+| View | Live query result |
+|---|---|
+| Measurement coverage | 10 checks, September 6 at 22:56:35 UTC through September 7 at 01:04:48 UTC |
+| SLO evaluation | Availability 100%: MET; latency compliance 70%: NOT MET; synthetic errors 0%: MET |
+| Latency percentiles | P50 409 ms; P95/P99 1,282 ms; mean 508 ms |
+| Availability error budget | 0 failures; 0.01 allowed/remaining failed checks; 100% remaining; NORMAL |
+| Observed daily availability | September 6: 5 checks, 100%, mean 424.2 ms; September 7: 5 checks, 100%, mean 591.8 ms |
+
+The latency objective remains unmet in this small sample. Investigate latency
+during the next supervised exercise before revising the target. The availability
+budget is an observed-event allowance, not measured remaining monthly uptime.
+No continuous monitoring was enabled during validation.
