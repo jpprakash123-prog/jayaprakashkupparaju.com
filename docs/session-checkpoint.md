@@ -1,57 +1,31 @@
-# Session Checkpoint
+﻿# Session Checkpoint
 
-## Current State
+## Current state
 
-- Phase 2 CI/CD foundations are active.
-- Pull requests run validation and deploy a temporary Azure preview through the
-  GitHub `DEV` environment.
-- Merges to `main` start an Azure deployment through the GitHub `PROD`
-  environment, which requires manual approval.
-- The permanent Azure Static Web Apps endpoint has been validated independently
-  from the public site.
-- The public custom domain still uses GitHub Pages and therefore deploys changes
-  from `main` without the Azure `PROD` approval gate.
-- GitHub Pages and its DNS records have not been disabled or redirected.
-- The Azure custom-domain binding failed after TXT validation and needs separate
-  troubleshooting before any DNS cutover.
+- The website and custom domain use Azure Static Web Apps; GitHub Pages is a documented fallback. See [deployment](deployment.md).
+- CI/CD includes validation, preview deployments, production approval, deployment metadata, and emergency rollback.
+- Phase 5 SLI definitions, SLOs, an error-budget policy, and Azure Workbook source are implemented. Continuous 30-day compliance is not established.
+- Privacy-safe real-user monitoring (RUM) was exercised on September 11, 2026. Ingestion and sanitized page views were validated during that exercise.
+- Normal builds disable RUM. The exercise cutoff was `2026-09-11T02:53:31Z`.
 
-## Latest Exercise
+## Closeout review — September 16, 2026
 
-- The manual emergency rollback workflow was merged and validated.
-- Azure production was rolled back to the known-good commit before the visible
-  Phase 2 badge.
-- The rollback succeeded and the badge is absent from the permanent Azure site.
-- `main` still contains the badge, so approving any new normal PROD deployment
-  would reintroduce it.
-- GitHub Pages still contains the badge because the Azure rollback did not alter
-  source history or the existing Pages deployment.
-- PR #5 adds public `deployment-info.json` provenance to Azure preview, normal
-  production, and rollback deployments.
-- PR #5 is committed and pushed on `phase-2-deployment-metadata`; its local CI,
-  formatting, functional metadata tests, and sensitive-data checks passed.
+- Device-code login restored Azure CLI access. Live verification completed September 17 UTC (September 16 local time).
+- Three page views and three browser timing events were returned, with none after the cutoff and no user IDs or unsanitized URLs. No exception rows were returned.
+- The paid availability test is disabled. Reported actual cost is $0.05376 USD month to date, with usage rows through September 16 and no reported increase from the rounded baseline.
+- The deployed workbook matches repository source, and all five queries executed successfully.
+- The 10 observed checks show 100% availability, 70% latency compliance, 0% synthetic errors, and 100% remaining sample availability budget (0.01 allowed failed checks). The latency objective is not met. This small historical sample does not establish monthly compliance.
+- See [RUM closeout](real-user-monitoring.md#closeout-verification) and [SLO validation](slo.md#live-dashboard-validation) for evidence.
 
-## Continue Next Session
+## Continue next
 
-1. Check PR #5 CI and Azure DEV preview results.
-2. Verify the preview's `/deployment-info.json` reports the correct content
-   commit, `preview` type, workflow run ID, and timestamps.
-3. Create a source-level revert PR for the Phase 2 badge so `main` matches the
-   known-good Azure production content.
-4. Merge the metadata and source-revert changes in a safe order. Do not approve
-   a normal PROD deployment while `main` still contains the badge.
-5. Approve the aligned normal PROD deployment and verify both the missing badge
-   and `/deployment-info.json` on the permanent Azure endpoint.
-6. Create a rollback runbook and update the Phase 2 roadmap.
-7. Remove the temporary repository-level Azure deployment secret after the
-   environment-scoped workflow is fully validated.
-8. Troubleshoot the failed Azure custom-domain binding without changing the
-   existing GitHub Pages DNS records.
+1. Review and publish the portfolio engineering case study in PR #17. Introduce a backend when a visitor-facing feature needs it; a standalone health API is deferred. Terraform remains outstanding.
+2. Investigate latency during the next supervised exercise; avoid drawing a production trend from ten checks.
+3. Continue monthly SLO reviews and cost checks. Missing monitoring periods remain unknown.
 
-## Safety Constraints
+## Safety constraints
 
-- Do not commit credentials, tokens, account identifiers, usernames, email
-  addresses, subscription or tenant identifiers, or other sensitive data.
-- Review staged changes and run the sensitive-data check before every commit or
-  push.
-- Do not change GitHub Pages or public DNS until Azure production and the custom
-  domain have both been validated.
+- Keep credentials, personal information, and Azure account identifiers out of tracked files and command output.
+- Keep paid availability testing disabled outside supervised exercises and preserve the annual project cost boundary.
+- Production deployments retain their approval gate.
+- Review changes and run the sensitive-data check before committing or pushing.

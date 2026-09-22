@@ -583,8 +583,8 @@ Approximately 43 minutes per 30-day month.
 - [x] Define error-rate SLI.
 - [x] Define 30-day SLOs.
 - [x] Calculate the error budget.
-- [ ] Build an SLO dashboard.
-- [ ] Track remaining error budget.
+- [x] Build an SLO dashboard (deployed source matched and all five queries validated).
+- [x] Track remaining error budget (observed laboratory sample; continuous coverage remains unavailable).
 - [x] Document what happens when the error budget is exhausted.
 - [ ] Review SLOs monthly.
 
