@@ -39,8 +39,9 @@ npm run ci
 npm audit --audit-level=high
 ```
 
-The build command creates `dist/` containing `index.html`, `profile.jpg`,
-the `projects/` case study pages, and generated RUM assets. Deployment workflows
+The build command creates `dist/` containing the homepage, `career.html`,
+`about.html`, `profile.jpg`, shared styles in `assets/`, the `projects/` index
+and case study, and generated RUM assets. Deployment workflows
 add `deployment-info.json`. The generated directory is ignored by Git.
 
 ## GitHub Workflows

@@ -9,6 +9,10 @@ const outputDirectory = resolve("dist");
 await rm(outputDirectory, { recursive: true, force: true });
 await mkdir(outputDirectory, { recursive: true });
 await cp(resolve("index.html"), resolve(outputDirectory, "index.html"));
+for (const page of ["career.html", "about.html"]) {
+  await cp(resolve(page), resolve(outputDirectory, page));
+}
+await cp(resolve("assets"), resolve(outputDirectory, "assets"), { recursive: true });
 await cp(resolve("profile.jpg"), resolve(outputDirectory, "profile.jpg"));
 await cp(resolve("projects"), resolve(outputDirectory, "projects"), { recursive: true });
 
