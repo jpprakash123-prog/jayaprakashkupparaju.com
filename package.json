@@ -5,7 +5,7 @@
   "description": "Validation and build tooling for the personal website SRE lab.",
   "scripts": {
     "build": "node scripts/build.mjs",
-    "lint:html": "html-validate index.html projects/*.html",
+    "lint:html": "html-validate index.html career.html about.html projects/*.html",
     "security": "node scripts/check-sensitive-data.mjs",
     "test": "node --test tests",
     "ci": "npm run lint:html && npm test && npm run security && npm run build"
